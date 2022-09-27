@@ -40,6 +40,11 @@ public class FilmController {
             generateId();
             film.setId(id);
         }
+        if (film.getId() < 0) {
+            ValidationException e = new ValidationException("id must not be negative");
+            handleValidationException(e);
+            throw e;
+        }
         if (film.getReleaseDate() != null && film.getReleaseDate()
                 .isBefore(LocalDate.of(1895, 12,28))) {
             ValidationException e = new ValidationException("Release date must not be earlier than 12-28-1895");
@@ -63,6 +68,11 @@ public class FilmController {
         if (film.getId() == 0) {
             generateId();
             film.setId(id);
+        }
+        if (film.getId() < 0) {
+            ValidationException e = new ValidationException("id must not be negative");
+            handleValidationException(e);
+            throw e;
         }
         if (film.getReleaseDate() != null && film.getReleaseDate()
                 .isBefore(LocalDate.of(1895, 12,28))) {

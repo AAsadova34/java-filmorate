@@ -26,6 +26,21 @@ class FilmControllerTest {
     }
 
     @Test
+    public void addFilmWithNegativeIdTest() {
+        Film film = Film.builder()
+                .id(-1)
+                .name("Psycho")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .build();
+
+        ValidationException e = Assertions.assertThrows(
+                ValidationException.class, () -> filmController.addFilm(film));
+        assertEquals("id must not be negative", e.getMessage());
+    }
+
+    @Test
     public void addFilmAgainTest() {
         Film film1 = Film.builder()
                 .id(1)

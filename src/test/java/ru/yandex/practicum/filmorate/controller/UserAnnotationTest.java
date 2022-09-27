@@ -44,24 +44,6 @@ public class UserAnnotationTest {
     }
 
     @Test
-    public void addUserWithNegativeIdTest() {
-        User user = User.builder()
-                .id(-1)
-                .email("name@yandex.ru")
-                .login("user1")
-                .name("Ivan")
-                .birthday(LocalDate.of(1990, 1, 1))
-                .build();
-        Set<ConstraintViolation<User>> violations = validator.validate(user);
-        assertEquals(violations.size(), 1);
-
-        ConstraintViolation<User> violation = violations.iterator().next();
-        assertEquals("id must not be negative", violation.getMessage());
-        assertEquals("id", violation.getPropertyPath().toString());
-        assertEquals(-1, violation.getInvalidValue());
-    }
-
-    @Test
     public void addUserWithEmptyEmailTest() {
         User user = User.builder()
                 .id(1)

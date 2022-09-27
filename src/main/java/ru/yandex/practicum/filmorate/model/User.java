@@ -9,9 +9,7 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class User {
-    @PositiveOrZero(message = "id must not be negative")
     private int id;
-
 
     @Email(message = "Invalid email format")
     private final String email;

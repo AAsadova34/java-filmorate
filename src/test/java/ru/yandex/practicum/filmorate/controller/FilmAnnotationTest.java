@@ -43,24 +43,6 @@ public class FilmAnnotationTest {
     }
 
     @Test
-    public void addFilmWithNegativeIdTest() {
-        Film film = Film.builder()
-                .id(-1)
-                .name("Psycho")
-                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
-                .releaseDate(LocalDate.of(1960, 1, 1))
-                .duration(109)
-                .build();
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(violations.size(), 1);
-
-        ConstraintViolation<Film> violation = violations.iterator().next();
-        assertEquals("id must not be negative", violation.getMessage());
-        assertEquals("id", violation.getPropertyPath().toString());
-        assertEquals(-1, violation.getInvalidValue());
-    }
-
-    @Test
     public void addFilmWithEmptyNameTest() {
         Film film = Film.builder()
                 .id(1)

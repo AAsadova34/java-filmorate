@@ -37,6 +37,11 @@ public class UserController {
             generateId();
             user.setId(id);
         }
+        if (user.getId() < 0) {
+            ValidationException e = new ValidationException("id must not be negative");
+            handleValidationException(e);
+            throw e;
+        }
         if (user.getLogin().contains(" ")) {
             ValidationException e = new ValidationException("Login must not contain spaces");
             handleValidationException(e);
@@ -62,6 +67,11 @@ public class UserController {
         if (user.getId() == 0) {
             generateId();
             user.setId(id);
+        }
+        if (user.getId() < 0) {
+            ValidationException e = new ValidationException("id must not be negative");
+            handleValidationException(e);
+            throw e;
         }
         if (user.getLogin().contains(" ")) {
             ValidationException e = new ValidationException("Login must not contain spaces");

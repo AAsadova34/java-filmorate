@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class Film {
-    @PositiveOrZero(message = "id must not be negative")
     private int id;
 
     @NotBlank(message = "Movie title must not be empty")

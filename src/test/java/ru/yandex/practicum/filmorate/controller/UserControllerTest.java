@@ -26,6 +26,21 @@ class UserControllerTest {
     }
 
     @Test
+    public void addUserWithNegativeId() {
+        User user = User.builder()
+                .id(-1)
+                .email("name@yandex.ru")
+                .login("user1")
+                .name("Ivan")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+
+        ValidationException e = Assertions.assertThrows(
+                ValidationException.class, () -> userController.addUser(user));
+        assertEquals("id must not be negative", e.getMessage());
+    }
+
+    @Test
     public void addUseAgainTest() {
         User user1 = User.builder()
                 .id(1)
