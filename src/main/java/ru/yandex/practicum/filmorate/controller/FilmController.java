@@ -12,19 +12,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ru.yandex.practicum.filmorate.exception.ErrorHandler.*;
-
-
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
     private final Map<Integer, Film> films = new HashMap<>();
     private int id = 0;
-
-    private void generateId() {
-        id++;
-    }
 
     @GetMapping
     public Collection getFilms() {
@@ -35,28 +28,11 @@ public class FilmController {
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         logRequest("POST", "/films", film.toString());
-
-        if (film.getId() == 0) {
-            generateId();
-            film.setId(id);
-        }
-        if (film.getId() < 0) {
-            ValidationException e = new ValidationException("id must not be negative");
-            handleValidationException(e);
-            throw e;
-        }
-        if (film.getReleaseDate() != null && film.getReleaseDate()
-                .isBefore(LocalDate.of(1895, 12,28))) {
-            ValidationException e = new ValidationException("Release date must not be earlier than 12-28-1895");
-            handleValidationException(e);
-            throw e;
-        }
-        if (!films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
+        Film verifiedFilm = checkValidation(film);
+        if (!films.containsKey(verifiedFilm.getId())) {
+            films.put(verifiedFilm.getId(), verifiedFilm);
         } else {
-            RedoCreationException e = new RedoCreationException("Movie already exists");
-            handleRedoCreationException(e);
-            throw e;
+            throw new RedoCreationException("Movie already exists");
         }
         return film;
     }
@@ -64,23 +40,27 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
         logRequest("PUT", "/films", film.toString());
+        Film verifiedFilm = checkValidation(film);
+        films.put(verifiedFilm.getId(), verifiedFilm);
+        return film;
+    }
 
+    private void generateId() {
+        id++;
+    }
+
+    private Film checkValidation(Film film) {
         if (film.getId() == 0) {
             generateId();
             film.setId(id);
         }
         if (film.getId() < 0) {
-            ValidationException e = new ValidationException("id must not be negative");
-            handleValidationException(e);
-            throw e;
+            throw new ValidationException("id must not be negative");
         }
         if (film.getReleaseDate() != null && film.getReleaseDate()
-                .isBefore(LocalDate.of(1895, 12,28))) {
-            ValidationException e = new ValidationException("Release date must not be earlier than 12-28-1895");
-            handleValidationException(e);
-            throw e;
+                .isBefore(LocalDate.of(1895, 12, 28))) {
+            throw new ValidationException("Release date must not be earlier than 12-28-1895");
         }
-        films.put(film.getId(), film);
         return film;
     }
 
