@@ -10,17 +10,31 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class ErrorHandler {
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler
-    public static String handleValidationException(ValidationException e) {
+    public ErrorResponse handleValidationException(ValidationException e) {
         log.warn("ValidationException", e);
-        return e.getMessage();
+        return new ErrorResponse(400, "Bad Request",e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler
-    public static String handleRedoCreationException(RedoCreationException e) {
+    public ErrorResponse handleRedoCreationException(RedoCreationException e) {
         log.warn("RedoCreationException", e);
-        return e.getMessage();
+        return new ErrorResponse(400, "Bad Request",e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler
+    public ErrorResponse handleObjectNotFoundException(ObjectNotFoundException e) {
+        log.warn("ObjectNotFoundException", e);
+        return new ErrorResponse(404, "Not Found", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleThrowable(final Throwable e) {
+        log.warn("Throwable", e);
+        return new ErrorResponse(500, "Internal Server Error", "Произошла непредвиденная ошибка.");
     }
 }

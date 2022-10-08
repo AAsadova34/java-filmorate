@@ -2,16 +2,25 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.RedoCreationException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
-    FilmController filmController = new FilmController();
+    FilmController filmController = new FilmController(
+            new FilmService(
+                    new InMemoryFilmStorage(
+                            new UserService(
+                                    new InMemoryUserStorage()))));
 
     @Test
     public void addFilmWithoutIdTest() {
@@ -23,21 +32,6 @@ class FilmControllerTest {
                 .build();
 
         assertEquals(1, filmController.addFilm(film).getId(), "Не сгенерирован id");
-    }
-
-    @Test
-    public void addFilmWithNegativeIdTest() {
-        Film film = Film.builder()
-                .id(-1)
-                .name("Psycho")
-                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
-                .releaseDate(LocalDate.of(1960, 1, 1))
-                .duration(109)
-                .build();
-
-        ValidationException e = Assertions.assertThrows(
-                ValidationException.class, () -> filmController.addFilm(film));
-        assertEquals("id must not be negative", e.getMessage());
     }
 
     @Test
@@ -104,19 +98,7 @@ class FilmControllerTest {
     }
 
     @Test
-    public void updateFilmWithoutIdTest() {
-        Film film = Film.builder()
-                .name("Psycho")
-                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
-                .releaseDate(LocalDate.of(1960, 1, 1))
-                .duration(109)
-                .build();
-
-        assertEquals(1, filmController.updateFilm(film).getId(), "Не сгенерирован id");
-    }
-
-    @Test
-    public void updateFilmAgainTest() {
+    public void updateFilmTest() {
         Film film1 = Film.builder()
                 .id(1)
                 .name("Psycho")
@@ -131,50 +113,24 @@ class FilmControllerTest {
                 .releaseDate(LocalDate.of(1960, 1, 1))
                 .duration(109)
                 .build();
-        filmController.updateFilm(film1);
+        filmController.addFilm(film1);
         filmController.updateFilm(film2);
 
-        assertFalse(filmController.getFilms().contains(film1), "Пользователь не обновлен");
-        assertTrue(filmController.getFilms().contains(film2), "Пользователь не обновлен");
+        assertFalse(filmController.getFilms().contains(film1), "Фильм не обновлен");
+        assertTrue(filmController.getFilms().contains(film2), "Фильм не обновлен");
     }
 
     @Test
-    public void updateAFilmWithNullDescriptionTest() {
-        Film film = Film.builder()
+    public void updateAnUncreatedFilmTest() {
+        Film film1 = Film.builder()
                 .id(1)
                 .name("Psycho")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
                 .duration(109)
                 .build();
-        filmController.updateFilm(film);
-        assertTrue(filmController.getFilms().contains(film), "Не добавлен фильм без описания");
-    }
-
-    @Test
-    public void updateFilmWithAnIncorrectReleaseDateTest() {
-        Film film = Film.builder()
-                .id(1)
-                .name("Psycho")
-                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
-                .releaseDate(LocalDate.of(1800, 1, 1))
-                .duration(109)
-                .build();
-
-        ValidationException e = Assertions.assertThrows(
-                ValidationException.class, () -> filmController.updateFilm(film));
-
-        assertEquals("Release date must not be earlier than 12-28-1895", e.getMessage());
-    }
-
-    @Test
-    public void updateFilmWithNullReleaseDateTest() {
-        Film film = Film.builder()
-                .id(1)
-                .name("Psycho")
-                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
-                .duration(109)
-                .build();
-        filmController.updateFilm(film);
-        assertTrue(filmController.getFilms().contains(film), "Не добавлен фильм без даты релиза");
+        ObjectNotFoundException e = Assertions.assertThrows(
+                ObjectNotFoundException.class, () -> filmController.updateFilm(film1));
+        assertEquals("Film with id 1 not found", e.getMessage());
     }
 }
