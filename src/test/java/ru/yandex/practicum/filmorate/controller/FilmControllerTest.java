@@ -17,10 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
     FilmController filmController = new FilmController(
-            new FilmService(
-                    new InMemoryFilmStorage(
-                            new UserService(
-                                    new InMemoryUserStorage()))));
+            new FilmService( new InMemoryFilmStorage(), new UserService(
+                                    new InMemoryUserStorage())));
 
     @Test
     public void addFilmWithoutIdTest() {
