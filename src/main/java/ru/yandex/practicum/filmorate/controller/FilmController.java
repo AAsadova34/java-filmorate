@@ -1,70 +1,70 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.RedoCreationException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
+import javax.validation.constraints.Positive;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 @Slf4j
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int id = 0;
+    private final FilmService filmService;
 
-    @GetMapping
-    public Collection getFilms() {
-        logRequest("GET", "/films", "no body");
-        return films.values();
+    @GetMapping//получить полный список фильмов
+    public Collection<Film> getFilms() {
+        logRequest(HttpMethod.GET, "/films", "no body");
+        return filmService.getFilms();
     }
 
-    @PostMapping
+    @PostMapping//добавить фильм
     public Film addFilm(@Valid @RequestBody Film film) {
-        logRequest("POST", "/films", film.toString());
-        Film verifiedFilm = checkValidation(film);
-        if (!films.containsKey(verifiedFilm.getId())) {
-            films.put(verifiedFilm.getId(), verifiedFilm);
-        } else {
-            throw new RedoCreationException("Movie already exists");
-        }
-        return film;
+        logRequest(HttpMethod.POST, "/films", film.toString());
+        return filmService.addFilm(film);
     }
 
-    @PutMapping
+    @PutMapping//обновить фильм или добавить фильм (если он не был добавлен ранее)
     public Film updateFilm(@Valid @RequestBody Film film) {
-        logRequest("PUT", "/films", film.toString());
-        Film verifiedFilm = checkValidation(film);
-        films.put(verifiedFilm.getId(), verifiedFilm);
-        return film;
+        logRequest(HttpMethod.PUT, "/films", film.toString());
+        return filmService.updateFilm(film);
     }
 
-    private void generateId() {
-        id++;
+    @GetMapping("/{id}") //получить фильм по id
+    public Film getFilmById(@PathVariable long id) {
+        logRequest(HttpMethod.GET, "/films/" + id, "no body");
+        return filmService.getFilmById(id);
     }
 
-    private Film checkValidation(Film film) {
-        if (film.getId() == 0) {
-            generateId();
-            film.setId(id);
-        }
-        if (film.getId() < 0) {
-            throw new ValidationException("id must not be negative");
-        }
-        if (film.getReleaseDate() != null && film.getReleaseDate()
-                .isBefore(LocalDate.of(1895, 12, 28))) {
-            throw new ValidationException("Release date must not be earlier than 12-28-1895");
-        }
-        return film;
+    @PutMapping("/{id}/like/{userId}")//поставить лайк
+    public Film addLike(@PathVariable long id,
+                           @PathVariable long userId) {
+        logRequest(HttpMethod.PUT, "/films/" + id + "/like/" + userId, "no body");
+        return filmService.addLike(id, userId);
     }
 
-    private void logRequest(String method, String uri, String body) {
+    @DeleteMapping("/{id}/like/{userId}")//снять лайк
+    public Film unlike(@PathVariable long id,
+                             @PathVariable long userId) {
+        logRequest(HttpMethod.DELETE, "/films/" + id + "/like/" + userId, "no body");
+        return filmService.unlike(id, userId);
+    }
+
+    @GetMapping("/popular") //получить список из первых count фильмов по количеству лайков
+    public List<Film> getTheBestFilms(@RequestParam(defaultValue = "10") @Positive int count) {
+        logRequest(HttpMethod.GET, "/films/popular?count=" + count, "no body");
+        return filmService.getTheBestFilms(count);
+    }
+
+    private void logRequest(HttpMethod method, String uri, String body) {
         log.info("Endpoint request received: '{} {}'. Request body: '{}'", method, uri, body);
     }
 }
