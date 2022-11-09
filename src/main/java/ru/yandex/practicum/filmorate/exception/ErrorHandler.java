@@ -14,14 +14,14 @@ public class ErrorHandler {
     @ExceptionHandler
     public ErrorResponse handleValidationException(ValidationException e) {
         log.warn("ValidationException", e);
-        return new ErrorResponse(400, "Bad Request",e.getMessage());
+        return new ErrorResponse(400, "Bad Request", e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler
     public ErrorResponse handleRedoCreationException(RedoCreationException e) {
         log.warn("RedoCreationException", e);
-        return new ErrorResponse(400, "Bad Request",e.getMessage());
+        return new ErrorResponse(400, "Bad Request", e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)

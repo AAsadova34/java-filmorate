@@ -43,15 +43,15 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")//добавить в друзья
-    public List<User> addAsFriend(@PathVariable long id,
-                            @PathVariable long friendId) {
+    public boolean addAsFriend(@PathVariable long id,
+                               @PathVariable long friendId) {
         logRequest(HttpMethod.PUT, "/users/" + id + "/friends/" + friendId, "no body");
         return userService.addAsFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")//удалить из друзей
-    public List<User> removeFromFriends(@PathVariable long id,
-                                  @PathVariable long friendId) {
+    public boolean removeFromFriends(@PathVariable long id,
+                                     @PathVariable long friendId) {
         logRequest(HttpMethod.DELETE, "/users/" + id + "/friends/" + friendId, "no body");
         return userService.removeFromFriends(id, friendId);
     }

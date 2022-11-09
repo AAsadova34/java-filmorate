@@ -45,17 +45,23 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")//поставить лайк
-    public Film addLike(@PathVariable long id,
+    public boolean addLike(@PathVariable long id,
                            @PathVariable long userId) {
         logRequest(HttpMethod.PUT, "/films/" + id + "/like/" + userId, "no body");
         return filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")//снять лайк
-    public Film unlike(@PathVariable long id,
-                             @PathVariable long userId) {
+    public boolean unlike(@PathVariable long id,
+                          @PathVariable long userId) {
         logRequest(HttpMethod.DELETE, "/films/" + id + "/like/" + userId, "no body");
         return filmService.unlike(id, userId);
+    }
+
+    @GetMapping("/{id}/likes")//получить список id пользователей, поставивших лайк
+    public List<Long> getListOfLikes(@PathVariable long id) {
+        logRequest(HttpMethod.GET, "/films/" + id + "/likes", "no body");
+        return filmService.getListOfLikes(id);
     }
 
     @GetMapping("/popular") //получить список из первых count фильмов по количеству лайков

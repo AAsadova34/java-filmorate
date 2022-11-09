@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -37,6 +38,7 @@ public class FilmAnnotationTest {
                 .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
                 .duration(109)
+                .mpa(Mpa.builder().id(1).name("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertTrue(violations.isEmpty());
@@ -50,6 +52,7 @@ public class FilmAnnotationTest {
                 .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
                 .duration(109)
+                .mpa(Mpa.builder().id(1).name("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(violations.size(), 1);
@@ -67,6 +70,7 @@ public class FilmAnnotationTest {
                 .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
                 .duration(109)
+                .mpa(Mpa.builder().id(1).name("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(violations.size(), 1);
@@ -88,6 +92,7 @@ public class FilmAnnotationTest {
                         "Болсам и Джон Макинтайр.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
                 .duration(109)
+                .mpa(Mpa.builder().id(1).name("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(violations.size(), 1);
@@ -105,6 +110,7 @@ public class FilmAnnotationTest {
                 .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
                 .duration(-1)
+                .mpa(Mpa.builder().id(1).name("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(violations.size(), 1);
@@ -122,6 +128,7 @@ public class FilmAnnotationTest {
                 .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
                 .duration(0)
+                .mpa(Mpa.builder().id(1).name("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(violations.size(), 1);
@@ -129,5 +136,22 @@ public class FilmAnnotationTest {
         ConstraintViolation<Film> violation = violations.iterator().next();
         assertEquals("Movie duration must be positive", violation.getMessage());
         assertEquals("duration", violation.getPropertyPath().toString());
+    }
+
+    @Test
+    public void addFilmWithNullMpaTest() {
+        Film film = Film.builder()
+                .id(1)
+                .name("Psycho")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .build();
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertEquals(violations.size(), 1);
+
+        ConstraintViolation<Film> violation = violations.iterator().next();
+        assertEquals("Mpa must not be null", violation.getMessage());
+        assertEquals("mpa", violation.getPropertyPath().toString());
     }
 }
