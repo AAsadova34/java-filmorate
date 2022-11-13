@@ -50,7 +50,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void addUserTest() {
+    void addUserTest() {
         User user = User.builder()
                 .email("user@yandex.ru")
                 .login("loginUser2022")
@@ -64,7 +64,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void updateUserTest() {
+    void updateUserTest() {
         User user1 = User.builder()
                 .email("user@yandex.ru")
                 .login("loginUser2022")
@@ -86,7 +86,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void updateUserFailTest() {
+    void updateUserFailTest() {
         User user = User.builder()
                 .id(999)
                 .email("user@yandex.ru")
@@ -101,13 +101,13 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getUsersByEmptyTest() {
+    void getUsersByEmptyTest() {
         Collection<User> users = userStorage.getUsers();
         assertThat("Список пользователей не пуст", users, empty());
     }
 
     @Test
-    public void getUsersTest() {
+    void getUsersTest() {
         User user1 = User.builder()
                 .email("user1@yandex.ru")
                 .login("user1")
@@ -128,14 +128,14 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getUserInvalidIdTest() {
+    void getUserInvalidIdTest() {
         ObjectNotFoundException e = Assertions.assertThrows(
                 ObjectNotFoundException.class, () -> userStorage.getUserById(1));
         assertThat("User with id 1 not found", equalTo(e.getMessage()));
     }
 
     @Test
-    public void getUserById() {
+    void getUserById() {
         User user1 = User.builder()
                 .email("user1@yandex.ru")
                 .login("user1")
@@ -147,13 +147,13 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getFriendsByEmptyTest() {
+    void getFriendsByEmptyTest() {
         Collection<Long> friends = friendsStorage.getListOfFriends(1);
         assertThat("Список друзей не пуст", friends, hasSize(0));
     }
 
     @Test
-    public void addAsFriendTest() {
+    void addAsFriendTest() {
         User user1 = User.builder()
                 .email("user1@yandex.ru")
                 .login("user1")
@@ -176,7 +176,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void removeFromFriendsAsFriendTest() {
+    void removeFromFriendsAsFriendTest() {
         User user1 = User.builder()
                 .email("user1@yandex.ru")
                 .login("user1")
@@ -200,7 +200,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getListOfFriendsTest() {
+    void getListOfFriendsTest() {
         User user1 = User.builder()
                 .email("user1@yandex.ru")
                 .login("user1")
@@ -229,7 +229,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getAListOfMutualFriendsTest() {
+    void getAListOfMutualFriendsTest() {
         User user1 = User.builder()
                 .email("user1@yandex.ru")
                 .login("user1")
@@ -259,7 +259,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void addFilmTest() {
+    void addFilmTest() {
         Film film = Film.builder()
                 .name("Psycho1")
                 .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
@@ -276,7 +276,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void updateFilmTest() {
+    void updateFilmTest() {
         Film film1 = Film.builder()
                 .name("Psycho1")
                 .description("Американский психологический хоррор 1960 года.")
@@ -304,7 +304,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void updateFilmFailTest() {
+    void updateFilmFailTest() {
         Film film = Film.builder()
                 .id(999)
                 .name("Psycho1")
@@ -322,13 +322,13 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getFilmsByEmptyTest() {
+    void getFilmsByEmptyTest() {
         Collection<Film> films = filmStorage.getFilms();
         assertThat("Список фильмов не пуст", films, empty());
     }
 
     @Test
-    public void getFilmsTest() {
+    void getFilmsTest() {
         Film film1 = Film.builder()
                 .name("Film1")
                 .description("Description1")
@@ -357,14 +357,14 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getFilmInvalidIdTest() {
+    void getFilmInvalidIdTest() {
         ObjectNotFoundException e = Assertions.assertThrows(
                 ObjectNotFoundException.class, () -> filmStorage.getFilmById(1));
         assertThat("Film with id 1 not found", equalTo(e.getMessage()));
     }
 
     @Test
-    public void getFilmById() {
+    void getFilmById() {
         Film film1 = Film.builder()
                 .name("Film1")
                 .description("Description1")
@@ -380,13 +380,13 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getLikesByEmptyTest() {
+    void getLikesByEmptyTest() {
         Collection<Long> likes = likesStorage.getListOfLikes(1);
         assertThat("Список лайков не пуст", likes, hasSize(0));
     }
 
     @Test
-    public void addLikeTest() {
+    void addLikeTest() {
         User user1 = User.builder()
                 .email("user1@yandex.ru")
                 .login("user1")
@@ -411,7 +411,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void unlikeTest() {
+    void unlikeTest() {
         User user1 = User.builder()
                 .email("user1@yandex.ru")
                 .login("user1")
@@ -439,7 +439,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getListOfLikes() {
+    void getListOfLikes() {
         User user1 = User.builder()
                 .email("user1@yandex.ru")
                 .login("user1")
@@ -465,7 +465,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getTheBestFilmsTest() {
+    void getTheBestFilmsTest() {
         User user1 = User.builder()
                 .email("user1@yandex.ru")
                 .login("user1")
@@ -511,7 +511,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getGenresTest() {
+    void getGenresTest() {
         Genre genre = Genre.builder()
                 .id(6)
                 .name("Боевик")
@@ -521,7 +521,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getGenreByIdTest() {
+    void getGenreByIdTest() {
         Genre genre1 = Genre.builder()
                 .id(1)
                 .name("Комедия")
@@ -535,7 +535,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void addGenreTest() {
+    void addGenreTest() {
         Genre genre1 = Genre.builder()
                 .id(1)
                 .name("Комедия")
@@ -551,12 +551,12 @@ class FilmorateApplicationTests {
                 .genres(List.of(Genre.builder().id(2).name("Драма").build()))
                 .build();
         Film addFilm1 = filmStorage.addFilm(film1);
-        filmGenreLineStorage.addGenre(1, addFilm1.getId());
+        filmGenreLineStorage.addGenres(List.of(genre1), addFilm1.getId());
         assertThat(filmStorage.getFilmById(addFilm1.getId()).getGenres(), hasItem(genre1));
     }
 
     @Test
-    public void getListOfGenresTest() {
+    void getListOfGenresTest() {
         Genre genre2 = Genre.builder()
                 .id(2)
                 .name("Драма")
@@ -576,7 +576,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void deleteGenreTest() {
+    void deleteGenreTest() {
         Genre genre2 = Genre.builder()
                 .id(2)
                 .name("Драма")
@@ -592,12 +592,12 @@ class FilmorateApplicationTests {
                 .genres(List.of(genre2))
                 .build();
         Film addFilm1 = filmStorage.addFilm(film1);
-        filmGenreLineStorage.deleteGenre(addFilm1.getId());
+        filmGenreLineStorage.deleteGenres(addFilm1.getId());
         assertThat(filmGenreLineStorage.getListOfGenres(addFilm1.getId()), empty());
     }
 
     @Test
-    public void getMpaTest() {
+    void getMpaTest() {
         Mpa mpa = Mpa.builder()
                 .id(1)
                 .name("G")
@@ -607,7 +607,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    public void getMpaById() {
+    void getMpaById() {
         Mpa mpa1 = Mpa.builder()
                 .id(1)
                 .name("G")

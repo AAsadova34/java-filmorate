@@ -2,15 +2,17 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.FilmGenreLine;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.dal.FilmGenreLineStorage;
 
-import java.util.HashMap;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -19,20 +21,30 @@ public class FilmGenreLineDbStorage implements FilmGenreLineStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public boolean addGenre(int genreId, long filmId) {
-        FilmGenreLine filmGenreLine = FilmGenreLine.builder()
-                .genreId(genreId)
-                .filmId(filmId).
-                build();
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("film_genre_line");
-        return simpleJdbcInsert.execute(toMap(filmGenreLine)) > 0;
+    public void addGenres(List<Genre> genres, long filmId) {
+        String sqlQuery = "INSERT INTO FILM_GENRE_LINE (FILM_ID, GENRE_ID) VALUES (?, ?)";
+        List<Genre> uniqueGenres = genres.stream()
+                .distinct()
+                .collect(Collectors.toList());
+        getJdbcTemplate().batchUpdate(sqlQuery, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i)
+                    throws SQLException {
+                Genre genre = uniqueGenres.get(i);
+                ps.setLong(1, filmId);
+                ps.setInt(2, genre.getId());
+            }
+            @Override
+            public int getBatchSize() {
+                return uniqueGenres.size();
+            }
+        });
     }
 
     @Override
-    public boolean deleteGenre(long filmId) {
-        String sqlQuery = "delete from film_genre_line where FILM_ID = ?";
-        return jdbcTemplate.update(sqlQuery, filmId) > 0;
+    public void deleteGenres(long filmId) {
+        String sqlQuery = "delete from FILM_GENRE_LINE where FILM_ID = ?";
+        jdbcTemplate.update(sqlQuery, filmId);
     }
 
     @Override
@@ -41,10 +53,7 @@ public class FilmGenreLineDbStorage implements FilmGenreLineStorage {
         return jdbcTemplate.queryForList(sqlQuery, Integer.class, id);
     }
 
-    public Map<String, Object> toMap(FilmGenreLine filmGenreLine) {
-        Map<String, Object> values = new HashMap<>();
-        values.put("film_id", filmGenreLine.getFilmId());
-        values.put("genre_id", filmGenreLine.getGenreId());
-        return values;
+    private JdbcOperations getJdbcTemplate() {
+        return jdbcTemplate;
     }
 }

@@ -43,11 +43,11 @@ public class LikesDbStorage implements LikesStorage {
 
     @Override
     public List<Long> getTheBestFilms(int count) {
-        String sqlQuery = "select f.FILM_ID " +
-                "from FILMS AS f " +
-                "left outer join LIKES AS l ON f.FILM_ID = l.FILM_ID " +
-                "group by f.FILM_id " +
-                "order by count(distinct l.USER_ID) desc " +
+        String sqlQuery = "select FILMS.FILM_ID " +
+                "from FILMS " +
+                "left outer join LIKES ON FILMS.FILM_ID = LIKES.FILM_ID " +
+                "group by FILMS.FILM_id " +
+                "order by count(distinct LIKES.USER_ID) desc " +
                 "limit + ?";
         List<Long> likes = jdbcTemplate.queryForList(sqlQuery, Long.class, count);
         return likes;

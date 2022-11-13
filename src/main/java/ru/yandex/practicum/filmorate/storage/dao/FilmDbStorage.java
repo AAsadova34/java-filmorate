@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 @Component
@@ -31,11 +30,8 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final LikesStorage likesStorage;
     private final MpaService mpaService;
-
     private final GenreService genreService;
-
     private final FilmGenreLineStorage filmGenreLineStorage;
-
 
     @Override
     public Collection<Film> getFilms() {
@@ -52,9 +48,7 @@ public class FilmDbStorage implements FilmStorage {
 
         //Добавить жанры
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
-            for (Genre genre : new HashSet<>(film.getGenres())) {
-                filmGenreLineStorage.addGenre(genre.getId(), filmId);
-            }
+            filmGenreLineStorage.addGenres(film.getGenres(), filmId);
         }
         return getFilmById(filmId);
     }
@@ -77,13 +71,11 @@ public class FilmDbStorage implements FilmStorage {
         //Очистить жанры
         Collection<Genre> existingGenres = oldFilm.getGenres();
         if (existingGenres != null && !existingGenres.isEmpty()) {
-            filmGenreLineStorage.deleteGenre(film.getId());
+            filmGenreLineStorage.deleteGenres(film.getId());
         }
         //Добавить жанры
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
-            for (Genre genre : new HashSet<>(film.getGenres())) {
-                filmGenreLineStorage.addGenre(genre.getId(), film.getId());
-            }
+            filmGenreLineStorage.addGenres(film.getGenres(), film.getId());
         }
         return getFilmById(film.getId());
     }

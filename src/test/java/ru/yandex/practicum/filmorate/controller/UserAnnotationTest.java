@@ -3,6 +3,9 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.ConstraintViolation;
@@ -20,18 +23,18 @@ public class UserAnnotationTest {
     private static Validator validator;
 
     @BeforeAll
-    public static void createValidator() {
+    static void createValidator() {
         validatorFactory = Validation.buildDefaultValidatorFactory();
         validator = validatorFactory.getValidator();
     }
 
     @AfterAll
-    public static void close() {
+    static void close() {
         validatorFactory.close();
     }
 
     @Test
-    public void addUserTest() {
+    void addUserTest() {
         User user = User.builder()
                 .id(1)
                 .email("name@yandex.ru")
@@ -44,7 +47,7 @@ public class UserAnnotationTest {
     }
 
     @Test
-    public void addUserWithEmptyEmailTest() {
+    void addUserWithEmptyEmailTest() {
         User user = User.builder()
                 .id(1)
                 .email(" ")
@@ -62,7 +65,7 @@ public class UserAnnotationTest {
     }
 
     @Test
-    public void addUserWithInvalidEmailFormatTest() {
+    void addUserWithInvalidEmailFormatTest() {
         User user = User.builder()
                 .id(1)
                 .email("@yandex.ru")
@@ -79,12 +82,14 @@ public class UserAnnotationTest {
         assertEquals("@yandex.ru", violation.getInvalidValue());
     }
 
-    @Test
-    public void addUserWithEmptyLoginTest() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" "})
+    void addUserWithEmptyLoginTest(String incorrectLogin) {
         User user = User.builder()
                 .id(1)
                 .email("name@yandex.ru")
-                .login(" ")
+                .login(incorrectLogin)
                 .name("Ivan")
                 .birthday(LocalDate.of(1990, 1, 1))
                 .build();
@@ -94,11 +99,10 @@ public class UserAnnotationTest {
         ConstraintViolation<User> violation = violations.iterator().next();
         assertEquals("Login must not be empty", violation.getMessage());
         assertEquals("login", violation.getPropertyPath().toString());
-        assertEquals(" ", violation.getInvalidValue());
     }
 
     @Test
-    public void addUserWithBirthdayInTheFutureTest() {
+    void addUserWithBirthdayInTheFutureTest() {
         User user = User.builder()
                 .id(1)
                 .email("name@yandex.ru")

@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.storage.dal;
 
+import ru.yandex.practicum.filmorate.model.Genre;
+
 import java.util.List;
 
 public interface FilmGenreLineStorage {
-
-    boolean addGenre(int genreId, long filmId);
-
-    boolean deleteGenre(long filmId);
+    void addGenres(List<Genre> genres, long filmId);
+    void deleteGenres(long filmId);
     List<Integer> getListOfGenres(long id);
 
 }

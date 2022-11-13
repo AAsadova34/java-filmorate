@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.dal.FriendsStorage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -44,13 +43,10 @@ public class FriendsDbStorage implements FriendsStorage {
 
     @Override
     public List<Long> getAListOfMutualFriends(long userId, long otherId) {
-        String sqlQuery = "select FRIEND_ID from FRIENDS where USER_ID = ?";
-        List<Long> friends = jdbcTemplate.queryForList(sqlQuery, Long.class, userId);
-        List<Long> otherFriends = jdbcTemplate.queryForList(sqlQuery, Long.class, otherId);
-
-        return friends.stream()
-                .filter(otherFriends::contains)
-                .collect(Collectors.toList());
+        String sqlQuery = "select FRIEND_ID " +
+                "from (select *  from FRIENDS where USER_ID = ? or USER_ID = ?) " +
+                "group by FRIEND_ID HAVING (COUNT(*) > 1)";
+        return jdbcTemplate.queryForList(sqlQuery, Long.class, userId, otherId);
     }
 
     private Map<String, Object> toMap(Friends friends) {
