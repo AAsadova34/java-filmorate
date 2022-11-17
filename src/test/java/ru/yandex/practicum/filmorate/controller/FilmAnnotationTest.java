@@ -3,7 +3,12 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -12,44 +17,49 @@ import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FilmAnnotationTest {
     private static ValidatorFactory validatorFactory;
     private static Validator validator;
 
     @BeforeAll
-    public static void createValidator() {
+    static void createValidator() {
         validatorFactory = Validation.buildDefaultValidatorFactory();
         validator = validatorFactory.getValidator();
     }
 
     @AfterAll
-    public static void close() {
+    static void close() {
         validatorFactory.close();
     }
 
     @Test
-    public void addFilmTest() {
+    void addFilmTest() {
         Film film = Film.builder()
                 .id(1)
                 .name("Psycho")
                 .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
                 .duration(109)
+                .mpa(Mpa.builder().id(1).name("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertTrue(violations.isEmpty());
     }
 
-    @Test
-    public void addFilmWithEmptyNameTest() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" "})
+    void addFilmWithIncorrectNameTest(String incorrectName) {
         Film film = Film.builder()
                 .id(1)
-                .name(" ")
+                .name(incorrectName)
                 .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
                 .duration(109)
+                .mpa(Mpa.builder().id(1).name("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(violations.size(), 1);
@@ -57,28 +67,10 @@ public class FilmAnnotationTest {
         ConstraintViolation<Film> violation = violations.iterator().next();
         assertEquals("Movie title must not be empty", violation.getMessage());
         assertEquals("name", violation.getPropertyPath().toString());
-        assertEquals(" ", violation.getInvalidValue());
     }
 
     @Test
-    public void addFilmWithNullNameTest() {
-        Film film = Film.builder()
-                .id(1)
-                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
-                .releaseDate(LocalDate.of(1960, 1, 1))
-                .duration(109)
-                .build();
-        Set<ConstraintViolation<Film>> violations = validator.validate(film);
-        assertEquals(violations.size(), 1);
-
-        ConstraintViolation<Film> violation = violations.iterator().next();
-        assertEquals("Movie title must not be empty", violation.getMessage());
-        assertEquals("name", violation.getPropertyPath().toString());
-        assertNull(violation.getInvalidValue());
-    }
-
-    @Test
-    public void addAFilmWithALongDescriptionTest() {
+    void addAFilmWithALongDescriptionTest() {
         Film film = Film.builder()
                 .id(1)
                 .name("Psycho")
@@ -88,6 +80,7 @@ public class FilmAnnotationTest {
                         "Болсам и Джон Макинтайр.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
                 .duration(109)
+                .mpa(Mpa.builder().id(1).name("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(violations.size(), 1);
@@ -97,14 +90,16 @@ public class FilmAnnotationTest {
         assertEquals("description", violation.getPropertyPath().toString());
     }
 
-    @Test
-    public void addFilmWithIncorrectDurationTest() {
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    void addFilmWithIncorrectDurationTest(int incorrectDuration) {
         Film film = Film.builder()
                 .id(1)
                 .name("Psycho")
                 .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
-                .duration(-1)
+                .duration(incorrectDuration)
+                .mpa(Mpa.builder().id(1).name("G").build())
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(violations.size(), 1);
@@ -114,20 +109,22 @@ public class FilmAnnotationTest {
         assertEquals("duration", violation.getPropertyPath().toString());
     }
 
-    @Test
-    public void addFilmWithZeroDurationTest() {
+    @ParameterizedTest
+    @NullSource
+    void addFilmWithNullMpaTest(Mpa nullMpa) {
         Film film = Film.builder()
                 .id(1)
                 .name("Psycho")
                 .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
                 .releaseDate(LocalDate.of(1960, 1, 1))
-                .duration(0)
+                .duration(109)
+                .mpa(nullMpa)
                 .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertEquals(violations.size(), 1);
 
         ConstraintViolation<Film> violation = violations.iterator().next();
-        assertEquals("Movie duration must be positive", violation.getMessage());
-        assertEquals("duration", violation.getPropertyPath().toString());
+        assertEquals("Mpa must not be null", violation.getMessage());
+        assertEquals("mpa", violation.getPropertyPath().toString());
     }
 }
