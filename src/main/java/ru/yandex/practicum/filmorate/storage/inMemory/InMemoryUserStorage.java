@@ -48,6 +48,11 @@ public class InMemoryUserStorage implements UserStorage {
         return users.get(id);
     }
 
+    @Override
+    public boolean removeUserById(long id) {
+        return false;
+    }
+
     private void generateId() {
         id++;
     }

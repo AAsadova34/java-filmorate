@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpMethod;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.log.Logger;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.GenreService;
@@ -90,6 +92,12 @@ public class FilmDbStorage implements FilmStorage {
             throw new ObjectNotFoundException(String.format("Film with id %s not found", filmId));
         }
         return film;
+    }
+
+    @Override
+    public boolean removeFilmById(long id) {
+        String sqlQuery = "delete from FILMS where FILM_ID = ?";
+        return jdbcTemplate.update(sqlQuery, id) > 0;
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {

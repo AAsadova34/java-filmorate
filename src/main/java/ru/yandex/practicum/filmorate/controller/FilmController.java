@@ -43,6 +43,12 @@ public class FilmController {
         return filmService.getFilmById(id);
     }
 
+    @DeleteMapping("/{id}")
+    public void removeFilmById(@PathVariable long id) {
+        Logger.logRequest(HttpMethod.DELETE, "/films/" + id, "no body");
+        filmService.removeFilmById(id);
+    }
+
     @PutMapping("/{id}/like/{userId}")//поставить лайк
     public void addLike(@PathVariable long id,
                            @PathVariable long userId) {

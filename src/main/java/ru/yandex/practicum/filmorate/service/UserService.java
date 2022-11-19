@@ -44,6 +44,14 @@ public class UserService {
         return userInStorage;
     }
 
+    public void removeUserById(long id) {
+        if (userStorage.removeUserById(id)) {
+            Logger.logSave(HttpMethod.DELETE,"/users/" + id, "User has deleted");
+        } else {
+            throw new ObjectNotFoundException(String.format("User with id %s not found", id));
+        }
+    }
+
     public void addAsFriend(long id, long friendId) {
         boolean addition;
         userStorage.getUserById(id);
