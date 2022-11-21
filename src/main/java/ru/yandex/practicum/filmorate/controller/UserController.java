@@ -41,6 +41,12 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    @DeleteMapping("/{id}")
+    public void removeUserById(@PathVariable long id) {
+        Logger.logRequest(HttpMethod.DELETE, "/users/" + id, "no body");
+        userService.removeUserById(id);
+    }
+
     @PutMapping("/{id}/friends/{friendId}")//добавить в друзья
     public void addAsFriend(@PathVariable long id,
                                @PathVariable long friendId) {
