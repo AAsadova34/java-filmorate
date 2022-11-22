@@ -8,18 +8,19 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
-import ru.yandex.practicum.filmorate.storage.dal.FilmGenreLineStorage;
-import ru.yandex.practicum.filmorate.storage.dal.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.dal.LikesStorage;
+import ru.yandex.practicum.filmorate.storage.dal.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -32,6 +33,8 @@ public class FilmDbStorage implements FilmStorage {
     private final MpaService mpaService;
     private final GenreService genreService;
     private final FilmGenreLineStorage filmGenreLineStorage;
+    private final FilmDirectorLineStorage filmDirectorLineStorage;
+    private final DirectorStorage directorStorage;
 
     @Override
     public Collection<Film> getFilms() {
@@ -50,6 +53,11 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             filmGenreLineStorage.addGenres(film.getGenres(), filmId);
         }
+
+        //Добавить режисеров
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            filmDirectorLineStorage.addDirectors(film.getDirectors(), filmId);
+        }
         return getFilmById(filmId);
     }
 
@@ -57,6 +65,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         String sqlQuery = "update FILMS set NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, RATE = ?, " +
                 "MPA_ID = ? where FILM_ID = ?";
+
         jdbcTemplate.update(sqlQuery
                 , film.getName()
                 , film.getDescription()
@@ -77,6 +86,16 @@ public class FilmDbStorage implements FilmStorage {
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             filmGenreLineStorage.addGenres(film.getGenres(), film.getId());
         }
+
+        //Очистить режиссеров
+        Collection<Director> existingDirectors = oldFilm.getDirectors();
+        if (existingDirectors != null && !existingDirectors.isEmpty()) {
+            filmDirectorLineStorage.deleteDirectors(film.getId());
+        }
+        //Добавить режиссеров
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            filmDirectorLineStorage.addDirectors(film.getDirectors(), film.getId());
+        }
         return getFilmById(film.getId());
     }
 
@@ -92,6 +111,16 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
+    @Override
+    public List<Film> getListOfDirectorFilms(Long directorId) {
+        List<Film> films;
+        String sqlQuery =  "SELECT films.* FROM films INNER JOIN film_director_line " +
+                "ON films.film_id = film_director_line.film_id " +
+                "WHERE film_director_line.director_id = ?";
+        directorStorage.getDirectorById(directorId);
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, directorId);
+    }
+
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         return Film.builder()
                 .id(resultSet.getLong("film_id"))
@@ -103,6 +132,7 @@ public class FilmDbStorage implements FilmStorage {
                 .mpa(mpaService.getMpaById(resultSet.getInt("mpa_id")))
                 .likes(likesStorage.getListOfLikes(resultSet.getLong("film_id")))
                 .genres(genreService.getListOfGenres(resultSet.getLong("film_id")))
+                .directors(directorStorage.getListOfFilmDirectors(resultSet.getLong("film_id")))
                 .build();
     }
 

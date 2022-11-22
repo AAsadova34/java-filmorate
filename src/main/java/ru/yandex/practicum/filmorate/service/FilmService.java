@@ -7,11 +7,14 @@ import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.log.Logger;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.dal.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesStorage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -87,5 +90,21 @@ public class FilmService {
             throw new ValidationException("Release date must not be earlier than 12-28-1895");
         }
         return film;
+    }
+    public List<Film> getSortedDirectorFilms(long filmId, String sortBy) {
+        List<Film> directorFilms = filmStorage.getListOfDirectorFilms(filmId);
+        List<Film> sortedDirectorFilms = new ArrayList<>();
+        if (sortBy.equals("year")) {
+            sortedDirectorFilms = directorFilms.stream()
+                    .sorted(Comparator.comparing(o->o.getReleaseDate()))
+                    .collect(Collectors.toList());
+        } else if (sortBy.equals("likes")) {
+            sortedDirectorFilms = directorFilms.stream()
+                    .sorted(Comparator.comparing(o->o.getLikes().size()))
+                    .collect(Collectors.toList());
+        }
+        Logger.logSave(HttpMethod.GET, "/films/director/" + filmId +"&sortBy=" + sortBy,
+                sortedDirectorFilms.toString());
+        return sortedDirectorFilms;
     }
 }

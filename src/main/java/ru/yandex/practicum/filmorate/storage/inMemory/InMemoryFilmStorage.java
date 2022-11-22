@@ -46,6 +46,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.get(id);
     }
 
+    @Override //заглушка
+    public List<Film> getListOfDirectorFilms(Long directorId) {
+        return null;
+    }
+
     private void generateId() {
         id++;
     }

@@ -34,7 +34,6 @@ public class GenreService {
         List<Genre> genreList = filmGenreLineStorage.getListOfGenres(id).stream()
                 .map(genreStorage::getGenreById)
                 .collect(Collectors.toList());
-
         return genreList;
     }
 }
