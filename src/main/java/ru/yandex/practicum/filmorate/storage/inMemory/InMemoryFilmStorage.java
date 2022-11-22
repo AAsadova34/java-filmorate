@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.RedoCreationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.dal.FilmStorage;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Component
@@ -50,6 +51,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public boolean removeFilmById(long id) {
         return false;
     }
+
 
     private void generateId() {
         id++;

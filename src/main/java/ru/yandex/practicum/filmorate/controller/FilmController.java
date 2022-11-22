@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.aspectj.lang.annotation.After;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.log.Logger;
@@ -9,6 +10,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -69,9 +71,13 @@ public class FilmController {
         return filmService.getListOfLikes(id);
     }
 
-    @GetMapping("/popular") //получить список из первых count фильмов по количеству лайков
-    public List<Film> getTheBestFilms(@RequestParam(defaultValue = "10") @Positive int count) {
-        Logger.logRequest(HttpMethod.GET, "/films/popular?count=" + count, "no body");
-        return filmService.getTheBestFilms(count);
+    @GetMapping("/popular")
+    public List<Film> getPopularByGenreAndYear( //получение count списка фильмов по жанру и году
+                                                @RequestParam(defaultValue = "10") @Positive int count,
+                                                @RequestParam(required = false) @Positive Integer genreId,
+                                                @RequestParam(required = false) Integer year) {
+        Logger.logRequest(HttpMethod.GET, "/films/popular?count=" + count +
+                "&genreId=" + genreId + "&year=" + year, "no body");
+        return filmService.getByGenreAndYear(count, genreId, year);
     }
 }
