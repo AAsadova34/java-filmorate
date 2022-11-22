@@ -9,10 +9,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.dal.*;
 
 import java.time.LocalDate;
@@ -269,6 +266,7 @@ class FilmorateApplicationTests {
                 .mpa(Mpa.builder().id(1).name("G").build())
                 .likes(new ArrayList<>())
                 .genres(new ArrayList<>())
+                .directors(new ArrayList<>())
                 .build();
         Film addFilm = filmStorage.addFilm(film);
         film.setId(1);
@@ -286,6 +284,7 @@ class FilmorateApplicationTests {
                 .mpa(Mpa.builder().id(1).name("G").build())
                 .likes(new ArrayList<>())
                 .genres(List.of(Genre.builder().id(2).name("Драма").build()))
+                .directors(List.of(Director.builder().name("Мэри Хэррон").build()))
                 .build();
         Film oldFilm = filmStorage.addFilm(film1);
         Film film2 = Film.builder()
@@ -298,6 +297,7 @@ class FilmorateApplicationTests {
                 .mpa(Mpa.builder().id(1).name("G").build())
                 .likes(new ArrayList<>())
                 .genres(new ArrayList<>())
+                .directors(new ArrayList<>())
                 .build();
         Film updateFilm = filmStorage.updateFilm(film2);
         assertThat("Фильм не обновлен", film2, equalTo(updateFilm));
@@ -315,6 +315,7 @@ class FilmorateApplicationTests {
                 .mpa(Mpa.builder().id(1).name("G").build())
                 .likes(new ArrayList<>())
                 .genres(List.of(Genre.builder().id(2).name("Драма").build()))
+                .directors(List.of(Director.builder().name("Мэри Хэррон").build()))
                 .build();
         ObjectNotFoundException e = Assertions.assertThrows(
                 ObjectNotFoundException.class, () -> filmStorage.updateFilm(film));
