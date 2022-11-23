@@ -49,6 +49,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override //заглушка
     public List<Film> getListOfDirectorFilms(long directorId) {
         return null;
+    }    
+
+    @Override
+    public boolean removeFilmById(long id) {
+        return false;
     }
 
     private void generateId() {

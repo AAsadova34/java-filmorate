@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.dal.*;
 
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,15 +35,19 @@ class FilmorateApplicationTests {
     private final GenreStorage genreStorage;
     private final LikesStorage likesStorage;
     private final MpaStorage mpaStorage;
-
+    private final ReviewStorage reviewStorage;
+    private final ReviewRatingStorage reviewRatingStorage;
 
     @AfterEach
     void tearDown() {
+        jdbcTemplate.update("DELETE FROM REVIEW_RATING");
         jdbcTemplate.update("DELETE FROM LIKES");
         jdbcTemplate.update("DELETE FROM FILM_GENRE_LINE");
         jdbcTemplate.update("DELETE FROM FRIENDS");
+        jdbcTemplate.update("DELETE FROM REVIEWS");
         jdbcTemplate.update("DELETE FROM USERS");
         jdbcTemplate.update("DELETE FROM FILMS");
+        jdbcTemplate.update("ALTER TABLE REVIEWS ALTER COLUMN REVIEW_ID RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1");
     }
@@ -608,7 +614,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    void getMpaById() {
+    void getMpaByIdTest() {
         Mpa mpa1 = Mpa.builder()
                 .id(1)
                 .name("G")
@@ -619,5 +625,349 @@ class FilmorateApplicationTests {
                 .build();
         assertThat(mpaStorage.getMpaById(1), equalTo(mpa1));
         assertThat(mpaStorage.getMpaById(5), equalTo(mpa5));
+    }
+
+    @Test
+    void addReviewTest() {
+        User user = User.builder()
+                .email("user@yandex.ru")
+                .login("loginUser2022")
+                .name("User")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .friends(new ArrayList<>())
+                .build();
+        User addUser = userStorage.addUser(user);
+        Film film = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film addFilm = filmStorage.addFilm(film);
+        Review review = Review.builder()
+                .content("Классный фильм")
+                .isPositive(true)
+                .userId(addUser.getId())
+                .filmId(addFilm.getId())
+                .build();
+        Review addReview = reviewStorage.addReview(review);
+        review.setReviewId(1);
+        assertThat(review, equalTo(addReview));
+    }
+
+    @Test
+    void updateReviewTest() {
+        User user = User.builder()
+                .email("user@yandex.ru")
+                .login("loginUser2022")
+                .name("User")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .friends(new ArrayList<>())
+                .build();
+        User addUser = userStorage.addUser(user);
+        Film film = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film addFilm = filmStorage.addFilm(film);
+        Review review = Review.builder()
+                .content("Классный фильм")
+                .isPositive(true)
+                .userId(addUser.getId())
+                .filmId(addFilm.getId())
+                .build();
+        Review addReview = reviewStorage.addReview(review);
+        Review newReview = Review.builder()
+                .reviewId(1)
+                .content("Плохой фильм")
+                .isPositive(false)
+                .userId(addUser.getId())
+                .filmId(addFilm.getId())
+                .build();
+        Review updateReview = reviewStorage.updateReview(newReview);
+        assertThat(newReview, equalTo(updateReview));
+    }
+
+    @Test
+    void updateSomeoneElseIsReviewTest() {
+        User user = User.builder()
+                .email("user@yandex.ru")
+                .login("loginUser2022")
+                .name("User")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .friends(new ArrayList<>())
+                .build();
+        User addUser = userStorage.addUser(user);
+        Film film = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film addFilm = filmStorage.addFilm(film);
+        Review review = Review.builder()
+                .content("Классный фильм")
+                .isPositive(true)
+                .userId(addUser.getId())
+                .filmId(addFilm.getId())
+                .build();
+        Review addReview = reviewStorage.addReview(review);
+        Review newReview = Review.builder()
+                .reviewId(1)
+                .content("Плохой фильм")
+                .isPositive(false)
+                .userId(2L)
+                .filmId(2L)
+                .build();
+        Review updateReview = reviewStorage.updateReview(newReview);
+        assertThat(newReview.getContent(), equalTo(updateReview.getContent()));
+        assertThat(newReview.getIsPositive(), equalTo(updateReview.getIsPositive()));
+        assertThat(addReview.getUserId(), equalTo(updateReview.getUserId()));
+        assertThat(addReview.getFilmId(), equalTo(updateReview.getFilmId()));
+    }
+
+    @Test
+    void removeReviewTest() {
+        User user = User.builder()
+                .email("user@yandex.ru")
+                .login("loginUser2022")
+                .name("User")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .friends(new ArrayList<>())
+                .build();
+        User addUser = userStorage.addUser(user);
+        Film film = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film addFilm = filmStorage.addFilm(film);
+        Review review = Review.builder()
+                .content("Классный фильм")
+                .isPositive(true)
+                .userId(addUser.getId())
+                .filmId(addFilm.getId())
+                .build();
+        Review addReview = reviewStorage.addReview(review);
+        assertThat(reviewStorage.getReviews(addFilm.getId(), 10), hasItem(addReview));
+        reviewStorage.removeReview(addReview.getReviewId());
+        assertThat(reviewStorage.getReviews(addFilm.getId(), 10), empty());
+    }
+
+    @Test
+    void getReviewByIdTest() {
+        User user = User.builder()
+                .email("user@yandex.ru")
+                .login("loginUser2022")
+                .name("User")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .friends(new ArrayList<>())
+                .build();
+        User addUser = userStorage.addUser(user);
+        Film film = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film addFilm = filmStorage.addFilm(film);
+        Review review = Review.builder()
+                .content("Классный фильм")
+                .isPositive(true)
+                .userId(addUser.getId())
+                .filmId(addFilm.getId())
+                .build();
+        Review addReview = reviewStorage.addReview(review);
+        assertThat(reviewStorage.getReviewById(addReview.getReviewId()), equalTo(addReview));
+    }
+
+    @Test
+    void getReviewByIdFailTest() {
+        ObjectNotFoundException e = Assertions.assertThrows(
+                ObjectNotFoundException.class, () -> reviewStorage.getReviewById(1));
+        assertThat("Review with id 1 not found", equalTo(e.getMessage()));
+    }
+
+    @Test
+    void getReviewsTest() {
+        User user = User.builder()
+                .email("user@yandex.ru")
+                .login("loginUser2022")
+                .name("User")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .friends(new ArrayList<>())
+                .build();
+        User addUser = userStorage.addUser(user);
+        Film film1 = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film addFilm1 = filmStorage.addFilm(film1);
+        Film film2 = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film addFilm2 = filmStorage.addFilm(film2);
+        Review review1 = Review.builder()
+                .content("Классный фильм")
+                .isPositive(true)
+                .userId(addUser.getId())
+                .filmId(addFilm1.getId())
+                .build();
+        Review addReview1 = reviewStorage.addReview(review1);
+        Review review2 = Review.builder()
+                .content("Плохой фильм")
+                .isPositive(false)
+                .userId(addUser.getId())
+                .filmId(addFilm2.getId())
+                .build();
+        Review addReview2 = reviewStorage.addReview(review2);
+        assertThat(reviewStorage.getReviews(0, 10), hasSize(2));
+        assertThat(reviewStorage.getReviews(addFilm1.getId(), 10), hasSize(1));
+        assertThat(reviewStorage.getReviews(addFilm1.getId(), 10), hasItem(addReview1));
+    }
+
+    @Test
+    void addAndRemoveLikeTest() {
+        User user = User.builder()
+                .email("user@yandex.ru")
+                .login("loginUser2022")
+                .name("User")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .friends(new ArrayList<>())
+                .build();
+        User addUser = userStorage.addUser(user);
+        Film film = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film addFilm = filmStorage.addFilm(film);
+        Review review = Review.builder()
+                .content("Классный фильм")
+                .isPositive(true)
+                .userId(addUser.getId())
+                .filmId(addFilm.getId())
+                .build();
+        Review addReview = reviewStorage.addReview(review);
+        reviewRatingStorage.addLikeDislike(addReview.getReviewId(), addUser.getId(), true);
+        assertThat(1L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
+        reviewRatingStorage.removeLikeDislike(addReview.getReviewId(), addUser.getId(), true);
+        assertThat(0L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
+    }
+
+    @Test
+    void addAndRemoveDislikeTest() {
+        User user = User.builder()
+                .email("user@yandex.ru")
+                .login("loginUser2022")
+                .name("User")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .friends(new ArrayList<>())
+                .build();
+        User addUser = userStorage.addUser(user);
+        Film film = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film addFilm = filmStorage.addFilm(film);
+        Review review = Review.builder()
+                .content("Классный фильм")
+                .isPositive(true)
+                .userId(addUser.getId())
+                .filmId(addFilm.getId())
+                .build();
+        Review addReview = reviewStorage.addReview(review);
+        reviewRatingStorage.addLikeDislike(addReview.getReviewId(), addUser.getId(), false);
+        assertThat(-1L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
+        reviewRatingStorage.removeLikeDislike(addReview.getReviewId(), addUser.getId(), false);
+        assertThat(0L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
+    }
+
+    @Test
+    void getReviewRatingTest() {
+        User user1 = User.builder()
+                .email("user@yandex.ru")
+                .login("loginUser2022")
+                .name("User1")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .friends(new ArrayList<>())
+                .build();
+        User addUser1 = userStorage.addUser(user1);
+        User user2 = User.builder()
+                .email("user@yandex.ru")
+                .login("loginUser2022")
+                .name("User2")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .friends(new ArrayList<>())
+                .build();
+        User addUser2 = userStorage.addUser(user2);
+        Film film = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film addFilm = filmStorage.addFilm(film);
+        Review review = Review.builder()
+                .content("Классный фильм")
+                .isPositive(true)
+                .userId(addUser1.getId())
+                .filmId(addFilm.getId())
+                .build();
+        Review addReview = reviewStorage.addReview(review);
+        reviewRatingStorage.addLikeDislike(addReview.getReviewId(), addUser1.getId(), true);
+        reviewRatingStorage.addLikeDislike(addReview.getReviewId(), addUser2.getId(), false);
+        assertThat(0L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
     }
 }

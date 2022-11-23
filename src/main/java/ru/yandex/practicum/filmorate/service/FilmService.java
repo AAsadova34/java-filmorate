@@ -49,6 +49,14 @@ public class FilmService {
         return filmInStorage;
     }
 
+    public void removeFilmById(long id) {
+        if (filmStorage.removeFilmById(id)) {
+            Logger.logSave(HttpMethod.DELETE,"/films/" + id, "Film has deleted");
+        } else {
+            throw new ObjectNotFoundException(String.format("Film with id %s not found", id));
+        }
+    }
+
     public void addLike(long id, long userId) {
         boolean addition;
         filmStorage.getFilmById(id);

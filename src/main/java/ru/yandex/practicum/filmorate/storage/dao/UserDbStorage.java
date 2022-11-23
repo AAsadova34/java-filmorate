@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpMethod;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.log.Logger;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dal.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.dal.UserStorage;
@@ -61,6 +63,12 @@ public class UserDbStorage implements UserStorage {
             throw new ObjectNotFoundException(String.format("User with id %s not found", userId));
         }
         return user;
+    }
+
+    @Override
+    public boolean removeUserById(long id) {
+        String sqlQuery = "delete from USERS where USER_ID = ?";
+        return jdbcTemplate.update(sqlQuery, id) > 0;
     }
 
     private Map<String, Object> toMap(User user) {

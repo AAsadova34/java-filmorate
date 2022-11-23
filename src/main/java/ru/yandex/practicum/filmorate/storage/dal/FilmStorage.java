@@ -11,4 +11,5 @@ public interface FilmStorage {
     Film updateFilm(Film film);
     Film getFilmById(long filmId);
     List<Film> getListOfDirectorFilms(long directorId);
+    boolean removeFilmById(long id);
 }
