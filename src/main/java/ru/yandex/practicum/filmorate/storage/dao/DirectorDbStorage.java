@@ -35,9 +35,10 @@ public class DirectorDbStorage implements DirectorStorage {
     public List<Director> getListOfFilmDirectors(long filmId) {
         String sqlQuery =  "SELECT directors.* FROM directors INNER JOIN film_director_line " +
                 "ON directors.director_id = film_director_line.director_id " +
-                "WHERE film_director_line.film_id = ?";;
+                "WHERE film_director_line.film_id = ?";
         return jdbcTemplate.query(sqlQuery, this::mapRowToDirector, filmId);
     }
+
     @Override
     public Director addDirector(Director director) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
