@@ -42,22 +42,23 @@ public class ReviewRatingDbStorage implements ReviewRatingStorage {
     }
 
     @Override
-    public int getReviewRating(long reviewId) {
-        String sqlQuery = "select COUNT(REVIEW_ID) " +
+    public long getReviewRating(long reviewId) {
+        String sqlQuery = "select IS_USEFUL, COUNT(REVIEW_ID) AS RATING " +
                 "from REVIEW_RATING " +
-                "where REVIEW_ID = ? and IS_USEFUL = ? " +
-                "group by IS_USEFUL, REVIEW_ID";
-        List<Integer> best = jdbcTemplate.queryForList(sqlQuery, Integer.class, reviewId, TRUE);
-        List<Integer> worst = jdbcTemplate.queryForList(sqlQuery, Integer.class, reviewId, FALSE);
-        if (!best.isEmpty() && !worst.isEmpty()) {
-            return best.get(0) - worst.get(0);
-        } else if (!best.isEmpty() && worst.isEmpty()) {
-            return best.get(0);
-        } else if (best.isEmpty() && !worst.isEmpty()) {
-            return -(worst.get(0));
-        } else {
-            return 0;
+                "where REVIEW_ID = ? " +
+                "group by IS_USEFUL " +
+                "order by IS_USEFUL desc";
+        List<Map<String,Object>> mapListRating = jdbcTemplate.queryForList(sqlQuery, reviewId);
+        if(mapListRating.size() == 2) {
+            return (Long) mapListRating.get(0).get("RATING") - (Long) mapListRating.get(1).get("RATING");
+        } else if (mapListRating.size() == 1) {
+            if (mapListRating.get(0).containsValue(TRUE)) {
+                return (Long) mapListRating.get(0).get("RATING");
+            } else if (mapListRating.get(0).containsValue(FALSE)) {
+                return - ((Long) mapListRating.get(0).get("RATING"));
+            }
         }
+            return 0;
     }
 
     private Map<String, Object> toMap(ReviewRating reviewRating) {

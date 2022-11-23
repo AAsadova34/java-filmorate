@@ -58,7 +58,7 @@ public class ReviewService {
         Logger.logSave(HttpMethod.GET, "/reviews?filmId=" + filmId + "&count=" + count, "no body");
         if (!listReview.isEmpty()) {
             return listReview.stream()
-                    .sorted(Comparator.comparingInt(Review::getUseful).reversed())
+                    .sorted(Comparator.comparingLong(Review::getUseful).reversed())
                     .collect(Collectors.toList());
         }
         return listReview;
