@@ -120,6 +120,7 @@ public class FilmDbStorage implements FilmStorage {
                 "WHERE film_director_line.director_id = ?";
         directorStorage.getDirectorById(directorId);
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, directorId);
+    }
     
     @Override
     public boolean removeFilmById(long id) {
