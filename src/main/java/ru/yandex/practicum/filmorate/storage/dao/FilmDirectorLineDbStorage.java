@@ -35,10 +35,4 @@ public class FilmDirectorLineDbStorage implements FilmDirectorLineStorage {
         String sqlQuery = "delete from film_director_line where FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, filmId);
     }
-
-    @Override
-    public List<Integer> getListOfDirectors(long id) {
-        String sqlQuery = "select GENRE_ID from film_director_line where FILM_ID = ?";
-        return jdbcTemplate.queryForList(sqlQuery, Integer.class, id);
-    }
 }

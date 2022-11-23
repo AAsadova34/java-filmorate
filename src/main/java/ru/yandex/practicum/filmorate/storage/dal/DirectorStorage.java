@@ -12,5 +12,5 @@ public interface DirectorStorage {
     Director updateDirector(Director director);
     Director getDirectorById(long directorId);
     boolean removeDirectorById(long id);
-    List<Director> getListOfFilmDirectors(Long filmId);
+    List<Director> getListOfFilmDirectors(long filmId);
 }

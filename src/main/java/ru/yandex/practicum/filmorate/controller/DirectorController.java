@@ -20,7 +20,6 @@ public class DirectorController {
     @GetMapping//получить полный список режиссеров
     public Collection<Director> getDirectors() {
         Logger.logRequest(HttpMethod.GET, "/directors/", "no body");
-        directorService.getDirectors();
         return directorService.getDirectors();
     }
 

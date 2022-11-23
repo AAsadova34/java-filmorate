@@ -70,7 +70,7 @@ public class FilmController {
         return filmService.getTheBestFilms(count);
     }
 
-    @GetMapping("/director/{id}") //получить список из первых count фильмов по количеству лайков
+    @GetMapping("/director/{id}") //получить список из фильмов режиссера с сортировкой по году или лайкам
     public List<Film> getSortedDirectorFilms(@PathVariable long id,
                                        @RequestParam(defaultValue = "year") @NotBlank String sortBy) {
         Logger.logRequest(HttpMethod.GET, "/films/director/" + id +"&sortBy=" + sortBy, "no body");

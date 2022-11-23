@@ -92,14 +92,13 @@ public class FilmService {
         return film;
     }
     public List<Film> getSortedDirectorFilms(long filmId, String sortBy) {
-        List<Film> directorFilms = filmStorage.getListOfDirectorFilms(filmId);
         List<Film> sortedDirectorFilms = new ArrayList<>();
         if (sortBy.equals("year")) {
-            sortedDirectorFilms = directorFilms.stream()
+            sortedDirectorFilms = filmStorage.getListOfDirectorFilms(filmId).stream()
                     .sorted(Comparator.comparing(o->o.getReleaseDate()))
                     .collect(Collectors.toList());
         } else if (sortBy.equals("likes")) {
-            sortedDirectorFilms = directorFilms.stream()
+            sortedDirectorFilms = filmStorage.getListOfDirectorFilms(filmId).stream()
                     .sorted(Comparator.comparing(o->o.getLikes().size()))
                     .collect(Collectors.toList());
         }

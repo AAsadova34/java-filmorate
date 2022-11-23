@@ -7,5 +7,4 @@ import java.util.List;
 public interface FilmDirectorLineStorage {
     void addDirectors(List<Director> directors, long filmId);
     void deleteDirectors(long filmId);
-    List<Integer> getListOfDirectors(long id);
 }

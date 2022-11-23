@@ -112,8 +112,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getListOfDirectorFilms(Long directorId) {
-        List<Film> films;
+    public List<Film> getListOfDirectorFilms(long directorId) {
         String sqlQuery =  "SELECT films.* FROM films INNER JOIN film_director_line " +
                 "ON films.film_id = film_director_line.film_id " +
                 "WHERE film_director_line.director_id = ?";

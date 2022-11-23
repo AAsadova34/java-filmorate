@@ -32,7 +32,7 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public List<Director> getListOfFilmDirectors(Long filmId) {
+    public List<Director> getListOfFilmDirectors(long filmId) {
         String sqlQuery =  "SELECT directors.* FROM directors INNER JOIN film_director_line " +
                 "ON directors.director_id = film_director_line.director_id " +
                 "WHERE film_director_line.film_id = ?";;
@@ -63,7 +63,7 @@ public class DirectorDbStorage implements DirectorStorage {
         try {
             director = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToDirector, directorId);
         } catch (DataAccessException e) {
-            throw new ObjectNotFoundException(String.format("Film with id %s not found", directorId));
+            throw new ObjectNotFoundException(String.format("Director with id %s not found", directorId));
         }
         return director;
     }
