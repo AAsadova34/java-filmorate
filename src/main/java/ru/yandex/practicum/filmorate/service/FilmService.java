@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
@@ -14,10 +13,8 @@ import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,7 +84,7 @@ public class FilmService {
         return likeList;
     }
 
-    public List<Film> getTheBestFilms(int count) {
+    private List<Film> getTheBestFilms(int count) {
         List<Film> bestFilms = likesStorage.getTheBestFilms(count).stream()
                 .map(filmStorage::getFilmById)
                 .collect(Collectors.toList());
