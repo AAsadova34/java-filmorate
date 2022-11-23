@@ -887,9 +887,9 @@ class FilmorateApplicationTests {
                 .build();
         Review addReview = reviewStorage.addReview(review);
         reviewRatingStorage.addLikeDislike(addReview.getReviewId(), addUser.getId(), true);
-        assertThat(1, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
+        assertThat(1L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
         reviewRatingStorage.removeLikeDislike(addReview.getReviewId(), addUser.getId(), true);
-        assertThat(0, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
+        assertThat(0L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
     }
 
     @Test
@@ -921,9 +921,9 @@ class FilmorateApplicationTests {
                 .build();
         Review addReview = reviewStorage.addReview(review);
         reviewRatingStorage.addLikeDislike(addReview.getReviewId(), addUser.getId(), false);
-        assertThat(-1, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
+        assertThat(-1L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
         reviewRatingStorage.removeLikeDislike(addReview.getReviewId(), addUser.getId(), false);
-        assertThat(0, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
+        assertThat(0L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
     }
 
     @Test
@@ -964,6 +964,6 @@ class FilmorateApplicationTests {
         Review addReview = reviewStorage.addReview(review);
         reviewRatingStorage.addLikeDislike(addReview.getReviewId(), addUser1.getId(), true);
         reviewRatingStorage.addLikeDislike(addReview.getReviewId(), addUser2.getId(), false);
-        assertThat(0, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
+        assertThat(0L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
     }
 }
