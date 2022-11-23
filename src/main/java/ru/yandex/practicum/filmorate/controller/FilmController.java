@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.util.Collection;
 import java.util.List;
@@ -73,5 +74,12 @@ public class FilmController {
     public List<Film> getTheBestFilms(@RequestParam(defaultValue = "10") @Positive int count) {
         Logger.logRequest(HttpMethod.GET, "/films/popular?count=" + count, "no body");
         return filmService.getTheBestFilms(count);
+    }
+
+    @GetMapping("/director/{id}") //получить список из фильмов режиссера с сортировкой по году или лайкам
+    public List<Film> getSortedDirectorFilms(@PathVariable long id,
+                                       @RequestParam(defaultValue = "year") @NotBlank String sortBy) {
+        Logger.logRequest(HttpMethod.GET, "/films/director/" + id +"&sortBy=" + sortBy, "no body");
+        return filmService.getSortedDirectorFilms(id, sortBy);
     }
 }
