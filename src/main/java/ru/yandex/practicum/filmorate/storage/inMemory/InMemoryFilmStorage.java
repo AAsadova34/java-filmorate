@@ -56,6 +56,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return false;
     }
 
+    @Override
+    public List<Film> getListOfFilmsByKeyword(String titleKeyWord, String directorKeyword) {
+        return null;
+    }
+
     private void generateId() {
         id++;
     }

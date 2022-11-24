@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.log.Logger;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.dal.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesStorage;
 
@@ -51,7 +50,7 @@ public class FilmService {
 
     public void removeFilmById(long id) {
         if (filmStorage.removeFilmById(id)) {
-            Logger.logSave(HttpMethod.DELETE,"/films/" + id, "Film has deleted");
+            Logger.logSave(HttpMethod.DELETE, "/films/" + id, "Film has deleted");
         } else {
             throw new ObjectNotFoundException(String.format("Film with id %s not found", id));
         }
@@ -99,19 +98,38 @@ public class FilmService {
         }
         return film;
     }
+
     public List<Film> getSortedDirectorFilms(long filmId, String sortBy) {
         List<Film> sortedDirectorFilms = new ArrayList<>();
         if (sortBy.equals("year")) {
             sortedDirectorFilms = filmStorage.getListOfDirectorFilms(filmId).stream()
-                    .sorted(Comparator.comparing(o->o.getReleaseDate()))
+                    .sorted(Comparator.comparing(o -> o.getReleaseDate()))
                     .collect(Collectors.toList());
         } else if (sortBy.equals("likes")) {
             sortedDirectorFilms = filmStorage.getListOfDirectorFilms(filmId).stream()
-                    .sorted(Comparator.comparing(o->o.getLikes().size()))
+                    .sorted(Comparator.comparing(o -> o.getLikes().size()))
                     .collect(Collectors.toList());
         }
-        Logger.logSave(HttpMethod.GET, "/films/director/" + filmId +"&sortBy=" + sortBy,
+        Logger.logSave(HttpMethod.GET, "/films/director/" + filmId + "&sortBy=" + sortBy,
                 sortedDirectorFilms.toString());
         return sortedDirectorFilms;
     }
+
+    public List<Film> getFilmsByQuery(String query, List<String> searchParams) {
+        if (query.isBlank()) {
+            return (List<Film>) getFilms();
+        }
+
+        String titleKeyword = "";
+        String directorKeyword = "";
+
+        if (searchParams.contains("director")) {
+            directorKeyword = query.toLowerCase();
+        }
+        if (searchParams.contains("title")) {
+            titleKeyword = query.toLowerCase();
+        }
+        return filmStorage.getListOfFilmsByKeyword(titleKeyword, directorKeyword);
+    }
+
 }
