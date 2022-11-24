@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.log.Logger;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -72,5 +73,11 @@ public class UserController {
                                               @PathVariable long otherId) {
         Logger.logRequest(HttpMethod.GET, "/users/" + id + "/friends/common/" + otherId, "no body");
         return userService.getAListOfMutualFriends(id, otherId);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable long id) {
+        Logger.logRequest(HttpMethod.GET, "/users/" + id + "/recommendations", "no body");
+        return userService.getRecommendations(id);
     }
 }
