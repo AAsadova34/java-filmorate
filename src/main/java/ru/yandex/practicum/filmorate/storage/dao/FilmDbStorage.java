@@ -123,36 +123,49 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getListOfFilmsByKeyword(String titleKeyword, String directorKeyword) {
-        List<Film> films = new ArrayList<>();
-        if ((!titleKeyword.isBlank() && !directorKeyword.isBlank()) ||
-                (titleKeyword.isBlank() && directorKeyword.isBlank())) {
+    public List<Film> getFilmsByTitleKeyword(String lowerCaseQuery) {
+        String sqlQuery =
+                "SELECT films.* FROM films " +
+                        "LEFT JOIN likes " +
+                        "ON films.film_id = likes.film_id " +
+                        "WHERE LOWER(films.name) LIKE '%'||?||'%' " +
+                        "GROUP BY films.film_id " +
+                        "ORDER BY COUNT(likes.user_id) DESC";
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, lowerCaseQuery);
+    }
+
+    @Override
+    public List<Film> getFilmsByDirectorKeyword(String lowerCaseQuery) {
+        String sqlQuery = "SELECT films.* FROM films " +
+                "LEFT JOIN likes " +
+                "ON films.film_id = likes.film_id " +
+                "JOIN film_director_line " +
+                "ON films.film_id = film_director_line.film_id " +
+                "JOIN directors " +
+                "ON film_director_line.director_id = directors.director_id " +
+                "WHERE LOWER(directors.name) LIKE '%'||?||'%' " +
+                "GROUP BY films.film_id " +
+                "ORDER BY COUNT(likes.user_id) DESC";
+
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, lowerCaseQuery);
+    }
+
+    @Override
+    public List<Film> getFilmsByTitleAndDirectorKeyword(String lowerCaseQuery) {
             String sqlQuery =
                     "SELECT films.* FROM films " +
-                            "WHERE LOWER(films.name) LIKE '%'||?||'%' OR films.film_id IN" +
-                            "(SELECT film_director_line.film_id FROM film_director_line " +
-                            "JOIN directors " +
-                            "ON film_director_line.director_id = directors.director_id " +
-                            "WHERE LOWER(directors.name) LIKE '%'||?||'%') " +
-                            "ORDER BY films.film_id DESC";
+                            "LEFT JOIN likes " +
+                            "ON films.film_id = likes.film_id " +
+                            "WHERE LOWER(films.name) LIKE '%'||?||'%' OR films.film_id IN " +
+                                "(SELECT film_director_line.film_id FROM film_director_line " +
+                                "JOIN directors " +
+                                "ON film_director_line.director_id = directors.director_id " +
+                                "WHERE LOWER(directors.name) LIKE '%'||?||'%') " +
+                            "GROUP BY films.film_id " +
+                            "ORDER BY COUNT(likes.user_id) DESC";
 
-            films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, titleKeyword, directorKeyword);
-        } else if (!titleKeyword.isBlank()) {
-            String sqlQuery =
-                    "SELECT films.* FROM films " +
-                            "WHERE LOWER(films.name) LIKE '%'||?||'%'";
-
-            films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, titleKeyword);
-        } else if (!directorKeyword.isBlank()) {
-            String sqlQuery = "SELECT films.* FROM films " +
-                    "JOIN film_director_line " +
-                    "ON films.film_id = film_director_line.film_id " +
-                    "JOIN directors " +
-                    "ON film_director_line.director_id = directors.director_id " +
-                    "WHERE LOWER(directors.name) LIKE '%'||?||'%'";
-            films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, directorKeyword);
-        }
-        return films;
+            return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, lowerCaseQuery, lowerCaseQuery);
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {

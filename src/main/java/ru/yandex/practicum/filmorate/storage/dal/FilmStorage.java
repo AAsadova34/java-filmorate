@@ -18,5 +18,10 @@ public interface FilmStorage {
 
     boolean removeFilmById(long id);
 
-    List<Film> getListOfFilmsByKeyword(String titleKeyWord, String directorKeyword);
+    List<Film> getFilmsByTitleKeyword(String query);
+
+    List<Film> getFilmsByDirectorKeyword(String query);
+
+    List<Film> getFilmsByTitleAndDirectorKeyword(String query);
+
 }

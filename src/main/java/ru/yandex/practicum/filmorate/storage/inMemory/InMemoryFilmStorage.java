@@ -49,7 +49,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override //заглушка
     public List<Film> getListOfDirectorFilms(long directorId) {
         return null;
-    }    
+    }
 
     @Override
     public boolean removeFilmById(long id) {
@@ -57,7 +57,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getListOfFilmsByKeyword(String titleKeyWord, String directorKeyword) {
+    public List<Film> getFilmsByTitleKeyword(String query) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getFilmsByDirectorKeyword(String query) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getFilmsByTitleAndDirectorKeyword(String query) {
         return null;
     }
 
