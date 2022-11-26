@@ -1170,7 +1170,7 @@ class FilmorateApplicationTests {
     @Test
     void addDirectorTest() {
         Director director = Director.builder()
-                .name("Стиве Спилберг")
+                .name("Стивен Спилберг")
                 .build();
         assertThat(1L, equalTo(directorStorage.addDirector(director).getId()));
     }
@@ -1178,7 +1178,7 @@ class FilmorateApplicationTests {
     @Test
     void updateDirectorTest() {
         Director director = Director.builder()
-                .name("Стиве Спилберг")
+                .name("Стивен Спилберг")
                 .build();
         director = directorStorage.addDirector(director);
         director.setName("Гайдай");
@@ -1197,7 +1197,7 @@ class FilmorateApplicationTests {
     @Test
     void getDirectorByIdTest() {
         Director director = Director.builder()
-                .name("Стиве Спилберг")
+                .name("Стивен Спилберг")
                 .build();
         directorStorage.addDirector(director);
         assertThat(1L, equalTo(directorStorage.getDirectorById(1).getId()));
@@ -1206,7 +1206,7 @@ class FilmorateApplicationTests {
     @Test
     void removeDirectorByIdTest() {
         Director director = Director.builder()
-                .name("Стиве Спилберг")
+                .name("Стивен Спилберг")
                 .build();
         directorStorage.addDirector(director);
         assertThat(true, equalTo(directorStorage.removeDirectorById(1)));
