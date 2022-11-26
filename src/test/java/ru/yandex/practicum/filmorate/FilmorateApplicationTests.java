@@ -37,6 +37,7 @@ class FilmorateApplicationTests {
     private final MpaStorage mpaStorage;
     private final ReviewStorage reviewStorage;
     private final ReviewRatingStorage reviewRatingStorage;
+    private final DirectorStorage directorStorage;
 
     @AfterEach
     void tearDown() {
@@ -45,8 +46,12 @@ class FilmorateApplicationTests {
         jdbcTemplate.update("DELETE FROM FILM_GENRE_LINE");
         jdbcTemplate.update("DELETE FROM FRIENDS");
         jdbcTemplate.update("DELETE FROM REVIEWS");
+        jdbcTemplate.update("DELETE FROM FILM_DIRECTOR_LINE");
+        jdbcTemplate.update("DELETE FROM DIRECTORS");
+        jdbcTemplate.update("DELETE FROM REVIEWS");
         jdbcTemplate.update("DELETE FROM USERS");
         jdbcTemplate.update("DELETE FROM FILMS");
+        jdbcTemplate.update("ALTER TABLE DIRECTORS ALTER COLUMN DIRECTOR_ID RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE REVIEWS ALTER COLUMN REVIEW_ID RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE USERS ALTER COLUMN USER_ID RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE FILMS ALTER COLUMN FILM_ID RESTART WITH 1");
@@ -970,4 +975,157 @@ class FilmorateApplicationTests {
         reviewRatingStorage.addLikeDislike(addReview.getReviewId(), addUser2.getId(), false);
         assertThat(0L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
     }
+
+    @Test
+    void addDirectorTest() {
+        Director director = Director.builder()
+                .name("Стиве Спилберг")
+                .build();
+        assertThat(1L, equalTo(directorStorage.addDirector(director).getId()));
+    }
+
+    @Test
+    void updateDirectorTest() {
+        Director director = Director.builder()
+                .name("Стиве Спилберг")
+                .build();
+        director = directorStorage.addDirector(director);
+        director.setName("Гайдай");
+        assertThat("Гайдай", equalTo(directorStorage.updateDirector(director).getName()));
+    }
+
+    @Test
+    void getDirectorsTest() {
+        Director director = Director.builder()
+                .name("Стиве Спилберг")
+                .build();
+        directorStorage.addDirector(director);
+        assertThat(1, equalTo(directorStorage.getDirectors().size()));
+    }
+
+    @Test
+    void getDirectorByIdTest() {
+        Director director = Director.builder()
+                .name("Стиве Спилберг")
+                .build();
+        directorStorage.addDirector(director);
+        assertThat(1L, equalTo(directorStorage.getDirectorById(1).getId()));
+    }
+
+    @Test
+    void removeDirectorByIdTest() {
+        Director director = Director.builder()
+                .name("Стиве Спилберг")
+                .build();
+        directorStorage.addDirector(director);
+        assertThat(true, equalTo(directorStorage.removeDirectorById(1)));
+    }
+
+    @Test
+    void getListOfFilmDirectors() {
+        Director director = Director.builder()
+                .name("Альфред Хичкок")
+                .build();
+        director = directorStorage.addDirector(director);
+        ArrayList<Director> directors = new ArrayList<>();
+        directors.add(director);
+        Film film = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .directors(directors)
+                .build();
+        filmStorage.addFilm(film);
+        assertThat(1, equalTo(directorStorage.getListOfFilmDirectors(1).size()));
+    }
+
+    @Test
+    void getListOfDirectorFilmsTest() {
+        Director director = Director.builder()
+                .name("Альфред Хичкок")
+                .build();
+        director = directorStorage.addDirector(director);
+        ArrayList<Director> directors = new ArrayList<>();
+        directors.add(director);
+        Film film = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .directors(directors)
+                .build();
+        filmStorage.addFilm(film);
+        assertThat(1, equalTo(filmStorage.getListOfDirectorFilms(1).size()));
+    }
+
+    @Test
+    void getFilmsByTitleKeywordTest() {
+        addFilmsAndDirectorsForSearch("upd");
+        assertThat(1, equalTo(filmStorage.getFilmsByTitleKeyword("upd").size()));
+        assertThat(0, equalTo(filmStorage.getFilmsByTitleKeyword("npd").size()));
+    }
+
+    @Test
+    void getFilmsByDirectorKeywordTest() {
+        addFilmsAndDirectorsForSearch("upd");
+        assertThat(1, equalTo(filmStorage.getFilmsByDirectorKeyword("upd").size()));
+        assertThat(0, equalTo(filmStorage.getFilmsByDirectorKeyword("npd").size()));
+    }
+
+    @Test
+    void getFilmsByTitleAndDirectorKeywordTest() {
+        addFilmsAndDirectorsForSearch("upd");
+        assertThat(2, equalTo(filmStorage.getFilmsByTitleAndDirectorKeyword("upd").size()));
+        assertThat(0, equalTo(filmStorage.getFilmsByTitleAndDirectorKeyword("not found").size()));
+    }
+
+    void addFilmsAndDirectorsForSearch(String query) {
+        Director director = Director.builder()
+                .name("Альфред Хичкок " + query)
+                .build();
+        director = directorStorage.addDirector(director);
+        ArrayList<Director> directors = new ArrayList<>();
+        directors.add(director);
+        Film film = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .directors(directors)
+                .build();
+        filmStorage.addFilm(film);
+
+        director = Director.builder()
+                .name("Альфред Хичкок")
+                .build();
+        director = directorStorage.addDirector(director);
+        ArrayList<Director> directors1 = new ArrayList<>();
+        directors1.add(director);
+        film = Film.builder()
+                .name("Psycho1 " + query)
+                .description("Американский психологический хоррор 1960 года")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .directors(directors1)
+                .build();
+        filmStorage.addFilm(film);
+    }
+
 }

@@ -116,25 +116,26 @@ public class FilmService {
     }
 
     public List<Film> getFilmsByQuery(String query, List<String> searchParams) {
-        Logger.logSave(HttpMethod.GET, "/films/search?query=" + query + "&by=" + searchParams,
-                "Films was found");
+        List<Film> films;
         if (query.isBlank()) {
-            return  getFilms().stream()
+            films =  getFilms().stream()
                     .sorted(Comparator.comparingInt(f -> f.getLikes().size()))
                     .collect(Collectors.toList());
-        }
-
-        String lowerCaseQuery = query.toLowerCase();
-
-        if (searchParams.contains("director") && searchParams.contains("title")) {
-            return filmStorage.getFilmsByTitleAndDirectorKeyword(lowerCaseQuery);
-        } else if (searchParams.contains("title")) {
-            return filmStorage.getFilmsByTitleKeyword(lowerCaseQuery);
-        } else if (searchParams.contains("director")) {
-            return filmStorage.getFilmsByDirectorKeyword(lowerCaseQuery);
         } else {
-            return filmStorage.getFilmsByTitleAndDirectorKeyword(lowerCaseQuery);
+            String lowerCaseQuery = query.toLowerCase();
+            if (searchParams.contains("director") && searchParams.contains("title")) {
+                films = filmStorage.getFilmsByTitleAndDirectorKeyword(lowerCaseQuery);
+            } else if (searchParams.contains("title")) {
+                films = filmStorage.getFilmsByTitleKeyword(lowerCaseQuery);
+            } else if (searchParams.contains("director")) {
+                films = filmStorage.getFilmsByDirectorKeyword(lowerCaseQuery);
+            } else {
+                films = filmStorage.getFilmsByTitleAndDirectorKeyword(lowerCaseQuery);
+            }
         }
+        Logger.logSave(HttpMethod.GET, "/films/search?query=" + query + "&by=" + searchParams,
+                films.toString());
+        return films;
     }
 
 }

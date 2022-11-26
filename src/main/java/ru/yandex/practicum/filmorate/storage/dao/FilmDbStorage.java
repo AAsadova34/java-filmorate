@@ -131,7 +131,6 @@ public class FilmDbStorage implements FilmStorage {
                         "WHERE LOWER(films.name) LIKE '%'||?||'%' " +
                         "GROUP BY films.film_id " +
                         "ORDER BY COUNT(likes.user_id) DESC";
-
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, lowerCaseQuery);
     }
 
@@ -147,7 +146,6 @@ public class FilmDbStorage implements FilmStorage {
                 "WHERE LOWER(directors.name) LIKE '%'||?||'%' " +
                 "GROUP BY films.film_id " +
                 "ORDER BY COUNT(likes.user_id) DESC";
-
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, lowerCaseQuery);
     }
 
@@ -164,7 +162,6 @@ public class FilmDbStorage implements FilmStorage {
                                 "WHERE LOWER(directors.name) LIKE '%'||?||'%') " +
                             "GROUP BY films.film_id " +
                             "ORDER BY COUNT(likes.user_id) DESC";
-
             return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, lowerCaseQuery, lowerCaseQuery);
     }
 
