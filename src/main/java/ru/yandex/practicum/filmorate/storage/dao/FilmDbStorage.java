@@ -123,6 +123,16 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getRecommendations(long userId) {
+        String sqlQuery = "select * from FILMS right join LIKES ON FILMS.FILM_ID=LIKES.FILM_ID " +
+                "where LIKES.USER_ID IN (select USER_ID from LIKES where NOT USER_ID = ? AND FILM_ID IN " +
+                "(select FILM_ID from LIKES where USER_ID=?) " +
+                "group by USER_ID order by COUNT(FILM_ID) desc LIMIT 1) " +
+                "and not LIKES.FILM_ID IN (select FILM_ID from LIKES where USER_ID=?)";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId, userId, userId);
+    }
+
+    @Override
     public List<Film> getFilmsByTitleKeyword(String lowerCaseQuery) {
         String sqlQuery =
                 "SELECT films.* FROM films " +

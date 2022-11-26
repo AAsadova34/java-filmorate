@@ -8,12 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.dal.*;
 
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -974,6 +972,199 @@ class FilmorateApplicationTests {
         reviewRatingStorage.addLikeDislike(addReview.getReviewId(), addUser1.getId(), true);
         reviewRatingStorage.addLikeDislike(addReview.getReviewId(), addUser2.getId(), false);
         assertThat(0L, equalTo(reviewRatingStorage.getReviewRating(addReview.getReviewId())));
+    }
+
+    @Test
+    void getRecommendationsIfNoLikes() {
+        User user1 = User.builder()
+                .email("user1@yandex.ru")
+                .login("user1")
+                .name("User1")
+                .birthday(LocalDate.of(1991, 1, 1))
+                .build();
+
+        User user1Added = userStorage.addUser(user1);
+        List<Film> recommendations = filmStorage.getRecommendations(user1Added.getId());
+        assertThat(recommendations, hasSize(0));
+    }
+
+    @Test
+    void getRecommendationsIfNoTheSameLikes() {
+        User user1 = User.builder()
+                .email("user1@yandex.ru")
+                .login("user1")
+                .name("User1")
+                .birthday(LocalDate.of(1991, 1, 1))
+                .build();
+        User user2 = User.builder()
+                .email("user2@yandex.ru")
+                .login("user2")
+                .name("User2")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+        User user1Added = userStorage.addUser(user1);
+        User user2Added = userStorage.addUser(user2);
+        Film film1 = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film film2 = Film.builder()
+                .name("Psycho2")
+                .description("Американский психологический хоррор 2")
+                .releaseDate(LocalDate.of(1962, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film film3 = Film.builder()
+                .name("Film3")
+                .description("Description3")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(List.of(Genre.builder().id(2).name("Драма").build()))
+                .build();
+        Film film1Added = filmStorage.addFilm(film1);
+        Film film2Added = filmStorage.addFilm(film2);
+        Film film3Added = filmStorage.addFilm(film3);
+        List<Film> recommendations = filmStorage.getRecommendations(user1Added.getId());
+        assertThat(recommendations, hasSize(0));
+        likesStorage.addLike(film1Added.getId(), user1Added.getId());
+        likesStorage.addLike(film2Added.getId(), user2Added.getId());
+        likesStorage.addLike(film3Added.getId(), user2Added.getId());
+        List<Film> recommendations2 = filmStorage.getRecommendations(user1Added.getId());
+        assertThat(recommendations2, hasSize(0));
+    }
+
+    @Test
+    void getRecommendationsIfTheSameLikes() {
+        User user1 = User.builder()
+                .email("user1@yandex.ru")
+                .login("user1")
+                .name("User1")
+                .birthday(LocalDate.of(1991, 1, 1))
+                .build();
+        User user2 = User.builder()
+                .email("user2@yandex.ru")
+                .login("user2")
+                .name("User2")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+        User user1Added = userStorage.addUser(user1);
+        User user2Added = userStorage.addUser(user2);
+
+        Film film1 = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film film2 = Film.builder()
+                .name("Psycho2")
+                .description("Американский психологический хоррор 2")
+                .releaseDate(LocalDate.of(1962, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film film3 = Film.builder()
+                .name("Film3")
+                .description("Description3")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(List.of(Genre.builder().id(2).name("Драма").build()))
+                .build();
+        Film film1Added = filmStorage.addFilm(film1);
+        filmStorage.addFilm(film2);
+        filmStorage.addFilm(film3);
+        List<Film> recommendations = filmStorage.getRecommendations(user1Added.getId());
+        assertThat(recommendations, hasSize(0));
+        likesStorage.addLike(film1Added.getId(), user1Added.getId());
+        likesStorage.addLike(film1Added.getId(), user2Added.getId());
+        List<Film> recommendations2 = filmStorage.getRecommendations(user1Added.getId());
+        assertThat(recommendations2, hasSize(0));
+    }
+
+    @Test
+    void getRecommendations() {
+        User user1 = User.builder()
+                .email("user1@yandex.ru")
+                .login("user1")
+                .name("User1")
+                .birthday(LocalDate.of(1991, 1, 1))
+                .build();
+        User user2 = User.builder()
+                .email("user2@yandex.ru")
+                .login("user2")
+                .name("User2")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+        User user1Added = userStorage.addUser(user1);
+        User user2Added = userStorage.addUser(user2);
+        Film film1 = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film film2 = Film.builder()
+                .name("Psycho2")
+                .description("Американский психологический хоррор 2")
+                .releaseDate(LocalDate.of(1962, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film film3 = Film.builder()
+                .name("Film3")
+                .description("Description3")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(List.of(Genre.builder().id(2).name("Драма").build()))
+                .build();
+        Film film1Added = filmStorage.addFilm(film1);
+        Film film2Added = filmStorage.addFilm(film2);
+        Film film3Added = filmStorage.addFilm(film3);
+        List<Film> recommendations = filmStorage.getRecommendations(user1Added.getId());
+        assertThat(recommendations, hasSize(0));
+        likesStorage.addLike(film1Added.getId(), user1Added.getId());
+        likesStorage.addLike(film1Added.getId(), user2Added.getId());
+        likesStorage.addLike(film2Added.getId(), user2Added.getId());
+        likesStorage.addLike(film3Added.getId(), user1Added.getId());
+        List<Film> recommendations2 = filmStorage.getRecommendations(user1Added.getId());
+        assertThat(recommendations2, hasSize(1));
+        assertThat(recommendations2.get(0).getId(), equalTo(2L));
+        List<Film> recommendations3 = filmStorage.getRecommendations(user2Added.getId());
+        assertThat(recommendations3, hasSize(1));
+        assertThat(recommendations3.get(0).getId(), equalTo(3L));
     }
 
     @Test

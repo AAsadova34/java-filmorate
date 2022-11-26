@@ -57,6 +57,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getRecommendations(long userId) {
+        return null;
+    }
+
+    @Override
     public List<Film> getFilmsByTitleKeyword(String query) {
         return null;
     }

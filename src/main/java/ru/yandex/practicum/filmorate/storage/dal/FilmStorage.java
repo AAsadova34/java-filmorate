@@ -18,6 +18,8 @@ public interface FilmStorage {
 
     boolean removeFilmById(long id);
 
+    List<Film> getRecommendations(long userId);
+
     List<Film> getFilmsByTitleKeyword(String query);
 
     List<Film> getFilmsByDirectorKeyword(String query);
