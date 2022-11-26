@@ -17,10 +17,7 @@ import ru.yandex.practicum.filmorate.storage.dal.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Primary
@@ -112,13 +109,13 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getListOfDirectorFilms(long directorId) {
-        String sqlQuery =  "SELECT films.* FROM films INNER JOIN film_director_line " +
+        String sqlQuery = "SELECT films.* FROM films INNER JOIN film_director_line " +
                 "ON films.film_id = film_director_line.film_id " +
                 "WHERE film_director_line.director_id = ?";
         directorStorage.getDirectorById(directorId);
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, directorId);
     }
-    
+
     @Override
     public boolean removeFilmById(long id) {
         String sqlQuery = "delete from FILMS where FILM_ID = ?";
@@ -133,6 +130,49 @@ public class FilmDbStorage implements FilmStorage {
                 "group by USER_ID order by COUNT(FILM_ID) desc LIMIT 1) " +
                 "and not LIKES.FILM_ID IN (select FILM_ID from LIKES where USER_ID=?)";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId, userId, userId);
+    }
+
+    @Override
+    public List<Film> getFilmsByTitleKeyword(String lowerCaseQuery) {
+        String sqlQuery =
+                "SELECT films.* FROM films " +
+                        "LEFT JOIN likes " +
+                        "ON films.film_id = likes.film_id " +
+                        "WHERE LOWER(films.name) LIKE '%'||?||'%' " +
+                        "GROUP BY films.film_id " +
+                        "ORDER BY COUNT(likes.user_id) DESC";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, lowerCaseQuery);
+    }
+
+    @Override
+    public List<Film> getFilmsByDirectorKeyword(String lowerCaseQuery) {
+        String sqlQuery = "SELECT films.* FROM films " +
+                "LEFT JOIN likes " +
+                "ON films.film_id = likes.film_id " +
+                "JOIN film_director_line " +
+                "ON films.film_id = film_director_line.film_id " +
+                "JOIN directors " +
+                "ON film_director_line.director_id = directors.director_id " +
+                "WHERE LOWER(directors.name) LIKE '%'||?||'%' " +
+                "GROUP BY films.film_id " +
+                "ORDER BY COUNT(likes.user_id) DESC";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, lowerCaseQuery);
+    }
+
+    @Override
+    public List<Film> getFilmsByTitleAndDirectorKeyword(String lowerCaseQuery) {
+            String sqlQuery =
+                    "SELECT films.* FROM films " +
+                            "LEFT JOIN likes " +
+                            "ON films.film_id = likes.film_id " +
+                            "WHERE LOWER(films.name) LIKE '%'||?||'%' OR films.film_id IN " +
+                                "(SELECT film_director_line.film_id FROM film_director_line " +
+                                "JOIN directors " +
+                                "ON film_director_line.director_id = directors.director_id " +
+                                "WHERE LOWER(directors.name) LIKE '%'||?||'%') " +
+                            "GROUP BY films.film_id " +
+                            "ORDER BY COUNT(likes.user_id) DESC";
+            return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, lowerCaseQuery, lowerCaseQuery);
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
