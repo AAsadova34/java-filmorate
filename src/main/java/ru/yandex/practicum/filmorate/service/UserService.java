@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.log.Logger;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.dal.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.dal.UserStorage;
 
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserStorage userStorage;
     private final FriendsStorage friendsStorage;
+    private final FilmStorage filmStorage;
 
     public Collection<User> getUsers() {
         Collection<User> usersInStorage = userStorage.getUsers();
@@ -89,6 +92,12 @@ public class UserService {
                 .collect(Collectors.toList());
         Logger.logSave(HttpMethod.GET, "/users/" + id + "/friends/common/" + otherId, mutualFriends.toString());
         return mutualFriends;
+    }
+
+    public List<Film> getRecommendations(long userId) {
+        List<Film> recommendations = filmStorage.getRecommendations(userId);
+        Logger.logSave(HttpMethod.GET, "/users/" + userId + "/recommendations", recommendations.toString());
+        return recommendations;
     }
 
     private User checkValidation(User user) {

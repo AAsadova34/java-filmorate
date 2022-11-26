@@ -4,16 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpMethod;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.log.Logger;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.service.GenreService;
 import ru.yandex.practicum.filmorate.service.MpaService;
 import ru.yandex.practicum.filmorate.storage.dal.*;
@@ -126,6 +123,16 @@ public class FilmDbStorage implements FilmStorage {
     public boolean removeFilmById(long id) {
         String sqlQuery = "delete from FILMS where FILM_ID = ?";
         return jdbcTemplate.update(sqlQuery, id) > 0;
+    }
+
+    @Override
+    public List<Film> getRecommendations(long userId) {
+        String sqlQuery = "select * from FILMS right join LIKES ON FILMS.FILM_ID=LIKES.FILM_ID " +
+                "where LIKES.USER_ID IN (select USER_ID from LIKES where NOT USER_ID = ? AND FILM_ID IN " +
+                "(select FILM_ID from LIKES where USER_ID=?) " +
+                "group by USER_ID order by COUNT(FILM_ID) desc LIMIT 1) " +
+                "and not LIKES.FILM_ID IN (select FILM_ID from LIKES where USER_ID=?)";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId, userId, userId);
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
