@@ -7,7 +7,9 @@ import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.log.Logger;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.dal.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesStorage;
 
 import java.time.LocalDate;
@@ -23,6 +25,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserService userService;
     private final LikesStorage likesStorage;
+    private final GenreStorage genreStorage;
 
     public Collection<Film> getFilms() {
         Collection<Film> filmsInStorage = filmStorage.getFilms();
@@ -83,7 +86,7 @@ public class FilmService {
         return likeList;
     }
 
-    public List<Film> getTheBestFilms(int count) {
+    private List<Film> getTheBestFilms(int count) {
         List<Film> bestFilms = likesStorage.getTheBestFilms(count).stream()
                 .map(filmStorage::getFilmById)
                 .collect(Collectors.toList());
@@ -99,7 +102,29 @@ public class FilmService {
         return film;
     }
 
-    public List<Film> getSortedDirectorFilms(long filmId, String sortBy) {
+    public List<Film> getByGenreAndYear(int limit, Integer genreId, Integer year) {
+        List<Film> top;
+        if (genreId != null && year != null) {
+            Genre genre = genreStorage.getGenreById(genreId);
+            top = getTheBestFilms(limit).stream()
+                    .filter(film -> film.getGenres().contains(genre))
+                    .filter(film -> film.getReleaseDate().getYear() == year)
+                    .collect(Collectors.toList());
+        } else if (genreId != null) {
+            Genre genre = genreStorage.getGenreById(genreId);
+            top = getTheBestFilms(limit).stream()
+                    .filter(film -> film.getGenres().contains(genre))
+                    .collect(Collectors.toList());
+        } else if (year != null) {
+            top = getTheBestFilms(limit).stream()
+                    .filter(film -> film.getReleaseDate().getYear() == year)
+                    .collect(Collectors.toList());
+        } else {
+            top = getTheBestFilms(limit);
+        }
+        return top;
+    }
+        public List<Film> getSortedDirectorFilms(long filmId, String sortBy) {
         List<Film> sortedDirectorFilms = new ArrayList<>();
         if (sortBy.equals("year")) {
             sortedDirectorFilms = filmStorage.getListOfDirectorFilms(filmId).stream()
@@ -137,5 +162,4 @@ public class FilmService {
                 films.toString());
         return films;
     }
-
 }

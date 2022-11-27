@@ -70,10 +70,14 @@ public class FilmController {
         return filmService.getListOfLikes(id);
     }
 
-    @GetMapping("/popular") //получить список из первых count фильмов по количеству лайков
-    public List<Film> getTheBestFilms(@RequestParam(defaultValue = "10") @Positive int count) {
-        Logger.logRequest(HttpMethod.GET, "/films/popular?count=" + count, "no body");
-        return filmService.getTheBestFilms(count);
+    @GetMapping("/popular")
+    public List<Film> getPopularByGenreAndYear( //получение count списка фильмов по жанру и году
+                                                @RequestParam(defaultValue = "10") @Positive int count,
+                                                @RequestParam(required = false) @Positive Integer genreId,
+                                                @RequestParam(required = false) Integer year) {
+        Logger.logRequest(HttpMethod.GET, "/films/popular?count=" + count +
+                "&genreId=" + genreId + "&year=" + year, "no body");
+        return filmService.getByGenreAndYear(count, genreId, year);
     }
 
     @GetMapping("/director/{id}") //получить список из фильмов режиссера с сортировкой по году или лайкам
