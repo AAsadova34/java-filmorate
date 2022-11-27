@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import java.util.Collection;
 import java.util.List;
@@ -51,14 +52,14 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")//поставить лайк
     public void addLike(@PathVariable long id,
-                           @PathVariable long userId) {
+                        @PathVariable long userId) {
         Logger.logRequest(HttpMethod.PUT, "/films/" + id + "/like/" + userId, "no body");
         filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")//снять лайк
     public void unlike(@PathVariable long id,
-                          @PathVariable long userId) {
+                       @PathVariable long userId) {
         Logger.logRequest(HttpMethod.DELETE, "/films/" + id + "/like/" + userId, "no body");
         filmService.unlike(id, userId);
     }
@@ -78,4 +79,19 @@ public class FilmController {
                 "&genreId=" + genreId + "&year=" + year, "no body");
         return filmService.getByGenreAndYear(count, genreId, year);
     }
+
+    @GetMapping("/director/{id}") //получить список из фильмов режиссера с сортировкой по году или лайкам
+    public List<Film> getSortedDirectorFilms(@PathVariable long id,
+                                             @RequestParam(defaultValue = "year") @NotBlank String sortBy) {
+        Logger.logRequest(HttpMethod.GET, "/films/director/" + id + "&sortBy=" + sortBy, "no body");
+        return filmService.getSortedDirectorFilms(id, sortBy);
+    }
+
+    @GetMapping("/search") //поиск по фильмам
+    public List<Film> getSearchedFilms(@RequestParam(defaultValue = "") String query,
+                                       @RequestParam(required = false) List<String> by) {
+        Logger.logRequest(HttpMethod.GET, "/films/search?query=" + query + "&by=" + by, "no body");
+        return filmService.getFilmsByQuery(query, by);
+    }
+
 }

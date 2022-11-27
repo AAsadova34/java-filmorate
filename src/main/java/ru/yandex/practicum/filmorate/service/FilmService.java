@@ -13,7 +13,9 @@ import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesStorage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,7 +53,7 @@ public class FilmService {
 
     public void removeFilmById(long id) {
         if (filmStorage.removeFilmById(id)) {
-            Logger.logSave(HttpMethod.DELETE,"/films/" + id, "Film has deleted");
+            Logger.logSave(HttpMethod.DELETE, "/films/" + id, "Film has deleted");
         } else {
             throw new ObjectNotFoundException(String.format("Film with id %s not found", id));
         }
@@ -121,5 +123,43 @@ public class FilmService {
             top = getTheBestFilms(limit);
         }
         return top;
+    }
+        public List<Film> getSortedDirectorFilms(long filmId, String sortBy) {
+        List<Film> sortedDirectorFilms = new ArrayList<>();
+        if (sortBy.equals("year")) {
+            sortedDirectorFilms = filmStorage.getListOfDirectorFilms(filmId).stream()
+                    .sorted(Comparator.comparing(o -> o.getReleaseDate()))
+                    .collect(Collectors.toList());
+        } else if (sortBy.equals("likes")) {
+            sortedDirectorFilms = filmStorage.getListOfDirectorFilms(filmId).stream()
+                    .sorted(Comparator.comparing(o -> o.getLikes().size()))
+                    .collect(Collectors.toList());
+        }
+        Logger.logSave(HttpMethod.GET, "/films/director/" + filmId + "&sortBy=" + sortBy,
+                sortedDirectorFilms.toString());
+        return sortedDirectorFilms;
+    }
+
+    public List<Film> getFilmsByQuery(String query, List<String> searchParams) {
+        List<Film> films;
+        if (query.isBlank()) {
+            films =  getFilms().stream()
+                    .sorted(Comparator.comparingInt(f -> f.getLikes().size()))
+                    .collect(Collectors.toList());
+        } else {
+            String lowerCaseQuery = query.toLowerCase();
+            if (searchParams.contains("director") && searchParams.contains("title")) {
+                films = filmStorage.getFilmsByTitleAndDirectorKeyword(lowerCaseQuery);
+            } else if (searchParams.contains("title")) {
+                films = filmStorage.getFilmsByTitleKeyword(lowerCaseQuery);
+            } else if (searchParams.contains("director")) {
+                films = filmStorage.getFilmsByDirectorKeyword(lowerCaseQuery);
+            } else {
+                films = filmStorage.getFilmsByTitleAndDirectorKeyword(lowerCaseQuery);
+            }
+        }
+        Logger.logSave(HttpMethod.GET, "/films/search?query=" + query + "&by=" + searchParams,
+                films.toString());
+        return films;
     }
 }
