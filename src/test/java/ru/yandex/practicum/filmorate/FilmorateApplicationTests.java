@@ -1161,4 +1161,73 @@ class FilmorateApplicationTests {
         assertThat(recommendations3, hasSize(1));
         assertThat(recommendations3.get(0).getId(), equalTo(3L));
     }
+
+    @Test
+    void getCommonFilmsTest() {
+        User user1 = User.builder()
+                .email("user1@yandex.ru")
+                .login("user1")
+                .name("User1")
+                .birthday(LocalDate.of(1991, 1, 1))
+                .build();
+        User user2 = User.builder()
+                .email("user2@yandex.ru")
+                .login("user2")
+                .name("User2")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+        User user3 = User.builder()
+                .email("user3@yandex.ru")
+                .login("user3")
+                .name("User3")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+        User user1Added = userStorage.addUser(user1);
+        User user2Added = userStorage.addUser(user2);
+        User user3Added = userStorage.addUser(user3);
+        Film film1 = Film.builder()
+                .name("Psycho1")
+                .description("Американский психологический хоррор 1960 года, снятый режиссёром Альфредом Хичкоком.")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film film2 = Film.builder()
+                .name("Psycho2")
+                .description("Американский психологический хоррор 2")
+                .releaseDate(LocalDate.of(1962, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(new ArrayList<>())
+                .build();
+        Film film3 = Film.builder()
+                .name("Film3")
+                .description("Description3")
+                .releaseDate(LocalDate.of(1960, 1, 1))
+                .duration(109)
+                .rate(1)
+                .mpa(Mpa.builder().id(1).name("G").build())
+                .likes(new ArrayList<>())
+                .genres(List.of(Genre.builder().id(2).name("Драма").build()))
+                .build();
+        Film film1Added = filmStorage.addFilm(film1);
+        Film film2Added = filmStorage.addFilm(film2);
+        Film film3Added = filmStorage.addFilm(film3);
+        List<Film> commonFilms = filmStorage.getListOfCommonFilms(user1Added.getId(), user2Added.getId());
+        assertThat(commonFilms, hasSize(0));
+        likesStorage.addLike(film3Added.getId(), user1Added.getId());
+        likesStorage.addLike(film3Added.getId(), user2Added.getId());
+        likesStorage.addLike(film1Added.getId(), user2Added.getId());
+        likesStorage.addLike(film2Added.getId(), user1Added.getId());
+        likesStorage.addLike(film3Added.getId(), user3Added.getId());
+        likesStorage.addLike(film1Added.getId(), user1Added.getId());
+        List<Film> commonFilms1 = filmStorage.getListOfCommonFilms(user1Added.getId(), user2Added.getId());
+        assertThat(commonFilms1, hasSize(2));
+        assertThat(commonFilms1.get(0).getId(), equalTo(film1Added.getId()));
+    }
 }
