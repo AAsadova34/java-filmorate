@@ -82,4 +82,11 @@ public class FilmController {
         Logger.logRequest(HttpMethod.GET, "/films/director/" + id +"&sortBy=" + sortBy, "no body");
         return filmService.getSortedDirectorFilms(id, sortBy);
     }
+
+    @GetMapping("/common") // получить общие фильмы
+    public Collection<Film> getListOfCommonFilms(@RequestParam("userId") String userId,
+                                                 @RequestParam("friendId") String friendId) {
+        Logger.logRequest(HttpMethod.GET, "/films/common?userId=" + userId + "&friendId=" + friendId, "no body");
+        return filmService.getListOfCommonFilms(Long.parseLong(userId), Long.parseLong(friendId));
+    }
 }

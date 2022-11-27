@@ -92,6 +92,13 @@ public class FilmService {
         return bestFilms;
     }
 
+    public List<Film> getListOfCommonFilms(long userId, long friendId) {
+        List<Film> common = filmStorage.getListOfCommonFilms(userId, friendId);
+        Logger.logSave(HttpMethod.GET, "/films/common?userId=" + userId + "&friendId={friendId}" + friendId,
+                common.toString());
+        return common;
+    }
+
     private Film checkValidation(Film film) {
         if (film.getReleaseDate() != null && film.getReleaseDate()
                 .isBefore(LocalDate.of(1895, 12, 28))) {
