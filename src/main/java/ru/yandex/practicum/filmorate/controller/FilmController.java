@@ -84,9 +84,9 @@ public class FilmController {
     }
 
     @GetMapping("/common") // получить общие фильмы
-    public Collection<Film> getListOfCommonFilms(@RequestParam("userId") String userId,
-                                                 @RequestParam("friendId") String friendId) {
+    public Collection<Film> getListOfCommonFilms(@RequestParam("userId") Long userId,
+                                                 @RequestParam("friendId") Long friendId) {
         Logger.logRequest(HttpMethod.GET, "/films/common?userId=" + userId + "&friendId=" + friendId, "no body");
-        return filmService.getListOfCommonFilms(Long.parseLong(userId), Long.parseLong(friendId));
+        return filmService.getListOfCommonFilms(userId, friendId);
     }
 }
