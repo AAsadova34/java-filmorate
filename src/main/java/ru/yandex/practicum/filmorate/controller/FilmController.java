@@ -87,6 +87,13 @@ public class FilmController {
         return filmService.getSortedDirectorFilms(id, sortBy);
     }
 
+    @GetMapping("/common") // получить общие фильмы
+    public Collection<Film> getListOfCommonFilms(@RequestParam("userId") Long userId,
+                                                 @RequestParam("friendId") Long friendId) {
+        Logger.logRequest(HttpMethod.GET, "/films/common?userId=" + userId + "&friendId=" + friendId, "no body");
+        return filmService.getListOfCommonFilms(userId, friendId);
+    }
+
     @GetMapping("/search") //поиск по фильмам
     public List<Film> getSearchedFilms(@RequestParam(defaultValue = "") String query,
                                        @RequestParam(required = false) List<String> by) {

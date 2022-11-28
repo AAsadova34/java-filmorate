@@ -176,6 +176,18 @@ public class FilmDbStorage implements FilmStorage {
             return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, lowerCaseQuery, lowerCaseQuery);
     }
 
+    @Override
+    public List<Film> getListOfCommonFilms(long userId, long friendId) {
+        String sqlQuery = "SELECT * FROM FILMS " +
+                "WHERE FILM_ID IN " +
+                "(SELECT FILM_ID FROM LIKES " +
+                "WHERE USER_ID=? OR USER_ID=? " +
+                "GROUP BY FILM_ID " +
+                "HAVING Count(FILM_ID) >1 " +
+                "ORDER BY count(USER_ID) DESC)";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId, friendId);
+    }
+
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         return Film.builder()
                 .id(resultSet.getLong("film_id"))
