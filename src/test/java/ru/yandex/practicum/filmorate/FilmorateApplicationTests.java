@@ -1319,9 +1319,6 @@ class FilmorateApplicationTests {
         filmStorage.addFilm(film);
     }
 
-}
-
-
     @Test
     void getCommonFilmsTest() {
         User user1 = User.builder()
