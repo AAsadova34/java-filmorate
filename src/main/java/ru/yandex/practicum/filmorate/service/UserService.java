@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.log.Logger;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.dal.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.dal.UserStorage;
@@ -22,6 +22,7 @@ public class UserService {
     private final UserStorage userStorage;
     private final FriendsStorage friendsStorage;
     private final FilmStorage filmStorage;
+    private final FeedStorage feedStorage;
 
     public Collection<User> getUsers() {
         Collection<User> usersInStorage = userStorage.getUsers();
@@ -60,6 +61,9 @@ public class UserService {
         userStorage.getUserById(id);
         userStorage.getUserById(friendId);
         addition = friendsStorage.addAsFriend(id, friendId);
+        if (addition) {
+            feedStorage.addFeed(id, FeedTypes.FRIEND.toString(), FeedOperationTypes.ADD.toString(), friendId);
+        }
         Logger.logSave(HttpMethod.PUT, "/users/" + id + "/friends/" + friendId, ((Boolean) addition).toString());
     }
 
@@ -72,6 +76,7 @@ public class UserService {
             throw new ObjectNotFoundException(String.format("User with id %s is not friends with user with id %s",
                     id, friendId));
         }
+        feedStorage.addFeed(id, FeedTypes.FRIEND.toString(), FeedOperationTypes.REMOVE.toString(), friendId);
         Logger.logSave(HttpMethod.DELETE, "/users/" + id + "/friends/" + friendId, ((Boolean) removal).toString());
     }
 
@@ -108,5 +113,11 @@ public class UserService {
             user.setName(user.getLogin());
         }
         return user;
+    }
+
+    public List<Feed> getUsersFeed(long userId) {
+        List<Feed> feedInStorage = feedStorage.getFeedByUserId(userId);
+        Logger.logSave(HttpMethod.GET, "/users/" + userId, feedInStorage.toString());
+        return feedInStorage;
     }
 }

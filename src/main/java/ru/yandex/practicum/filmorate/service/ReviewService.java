@@ -5,7 +5,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.log.Logger;
-import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.dal.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.dal.ReviewRatingStorage;
 import ru.yandex.practicum.filmorate.storage.dal.ReviewStorage;
 
@@ -23,11 +24,15 @@ public class ReviewService {
     private final ReviewRatingStorage reviewRatingStorage;
     private final UserService userService;
     private final FilmService filmService;
+    private final FeedStorage feedStorage;
 
     public Review addReview(Review review) {
         userService.getUserById(review.getUserId());
         filmService.getFilmById(review.getFilmId());
         Review reviewInStorage = reviewStorage.addReview(review);
+        feedStorage.addFeed(reviewInStorage.getUserId(), FeedTypes.REVIEW.toString(),
+                FeedOperationTypes.ADD.toString(), reviewInStorage.getReviewId());
+
         Logger.logSave(HttpMethod.POST, "/reviews", reviewInStorage.toString());
         return reviewInStorage;
     }
@@ -35,16 +40,23 @@ public class ReviewService {
     public Review updateReview(Review review) {
         userService.getUserById(review.getUserId());
         filmService.getFilmById(review.getFilmId());
+        Review oldReview = reviewStorage.getReviewById(review.getReviewId());
         Review reviewInStorage = reviewStorage.updateReview(review);
+        feedStorage.addFeed(oldReview.getUserId(), FeedTypes.REVIEW.toString(),
+                FeedOperationTypes.UPDATE.toString(), oldReview.getFilmId());
         Logger.logSave(HttpMethod.PUT, "/reviews", reviewInStorage.toString());
         return reviewInStorage;
     }
 
     public void removeReview(long id) {
+        long userId = getReviewById(id).getUserId();
+        long filmId = getReviewById(id).getFilmId();
         boolean removal = reviewStorage.removeReview(id);
         if (!removal) {
             throw new ObjectNotFoundException(String.format("Review with id %s not found", id));
         }
+        feedStorage.addFeed(userId, FeedTypes.REVIEW.toString(),
+                FeedOperationTypes.REMOVE.toString(), filmId);
         Logger.logSave(HttpMethod.DELETE, "/reviews/" + id, ((Boolean) removal).toString());
     }
 
