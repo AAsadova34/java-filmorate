@@ -49,7 +49,7 @@ public class FeedDbStorage implements FeedStorage {
     private Feed mapRowToFeed(ResultSet resultSet) throws SQLException {
         return Feed.builder()
                 .eventId(resultSet.getLong("event_id"))
-                .timestamp(resultSet.getLong("timestamp"))
+                .timestamp(resultSet.getLong("creation_date"))
                 .userId((int) resultSet.getLong("user_id"))
                 .eventType(resultSet.getString("event_type"))
                 .operation(resultSet.getString("operation"))
@@ -60,7 +60,7 @@ public class FeedDbStorage implements FeedStorage {
     private Map<String, Object> feedToMap(Feed feed) {
         Map<String, Object> values = new HashMap<>();
         values.put("event_id", feed.getEventId());
-        values.put("timestamp", feed.getTimestamp());
+        values.put("creation_date", feed.getTimestamp());
         values.put("user_id", feed.getUserId());
         values.put("event_type", feed.getEventType());
         values.put("operation", feed.getOperation());
