@@ -76,7 +76,7 @@ public class UserService {
             throw new ObjectNotFoundException(String.format("User with id %s is not friends with user with id %s",
                     id, friendId));
         }
-        feedStorage.addFeed(id, FeedTypes.FRIEND.toString(), FeedOperationTypes.DELETE.toString(), friendId);
+        feedStorage.addFeed(id, FeedTypes.FRIEND.toString(), FeedOperationTypes.REMOVE.toString(), friendId);
         Logger.logSave(HttpMethod.DELETE, "/users/" + id + "/friends/" + friendId, ((Boolean) removal).toString());
     }
 

@@ -81,7 +81,7 @@ public class FilmService {
             throw new ObjectNotFoundException(String.format("User with id %s did not like the movie with id %s",
                     userId, id));
         }
-        feedStorage.addFeed(userId, FeedTypes.LIKE.toString(), FeedOperationTypes.DELETE.toString(), id);
+        feedStorage.addFeed(userId, FeedTypes.LIKE.toString(), FeedOperationTypes.REMOVE.toString(), id);
         Logger.logSave(HttpMethod.DELETE, "/films/" + id + "/like/" + userId, ((Boolean) removal).toString());
     }
 

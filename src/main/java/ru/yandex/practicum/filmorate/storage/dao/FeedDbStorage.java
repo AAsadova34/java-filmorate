@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.dal.FeedStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ public class FeedDbStorage implements FeedStorage {
     @Override
     public List<Feed> addFeed(Long userId, String event, String operation, Long entityId) {
         Feed feed = Feed.builder()
-                .createTime((long) LocalDateTime.now().getNano())
+                .timestamp(Timestamp.valueOf(LocalDateTime.now()).getTime())
                 .userId(Math.toIntExact(userId))
                 .eventType(event)
                 .operation(operation)
@@ -48,7 +49,7 @@ public class FeedDbStorage implements FeedStorage {
     private Feed mapRowToFeed(ResultSet resultSet) throws SQLException {
         return Feed.builder()
                 .eventId(resultSet.getLong("event_id"))
-                .createTime(resultSet.getLong("create_time"))
+                .timestamp(resultSet.getLong("timestamp"))
                 .userId((int) resultSet.getLong("user_id"))
                 .eventType(resultSet.getString("event_type"))
                 .operation(resultSet.getString("operation"))
@@ -59,7 +60,7 @@ public class FeedDbStorage implements FeedStorage {
     private Map<String, Object> feedToMap(Feed feed) {
         Map<String, Object> values = new HashMap<>();
         values.put("event_id", feed.getEventId());
-        values.put("create_time", feed.getCreateTime());
+        values.put("timestamp", feed.getTimestamp());
         values.put("user_id", feed.getUserId());
         values.put("event_type", feed.getEventType());
         values.put("operation", feed.getOperation());

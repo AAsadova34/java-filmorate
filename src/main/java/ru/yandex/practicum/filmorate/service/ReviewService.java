@@ -43,7 +43,6 @@ public class ReviewService {
         Review reviewInStorage = reviewStorage.updateReview(review);
         feedStorage.addFeed(review.getUserId(), FeedTypes.REVIEW.toString(),
                 FeedOperationTypes.UPDATE.toString(), review.getFilmId());
-
         Logger.logSave(HttpMethod.PUT, "/reviews", reviewInStorage.toString());
         return reviewInStorage;
     }
@@ -56,7 +55,7 @@ public class ReviewService {
             throw new ObjectNotFoundException(String.format("Review with id %s not found", id));
         }
         feedStorage.addFeed(userId, FeedTypes.REVIEW.toString(),
-                FeedOperationTypes.DELETE.toString(), filmId);
+                FeedOperationTypes.REMOVE.toString(), filmId);
         Logger.logSave(HttpMethod.DELETE, "/reviews/" + id, ((Boolean) removal).toString());
     }
 
@@ -107,7 +106,7 @@ public class ReviewService {
                     userId, reviewId));
         }
         feedStorage.addFeed(userId, FeedTypes.LIKE.toString(),
-                FeedOperationTypes.DELETE.toString(), reviewId);
+                FeedOperationTypes.REMOVE.toString(), reviewId);
         Logger.logSave(HttpMethod.DELETE, "/reviews/" + reviewId + "/like/" + userId,
                 ((Boolean) removal).toString());
     }
@@ -122,7 +121,7 @@ public class ReviewService {
                     userId, reviewId));
         }
         feedStorage.addFeed(userId, FeedTypes.DISLIKE.toString(),
-                FeedOperationTypes.DELETE.toString(), reviewId);
+                FeedOperationTypes.REMOVE.toString(), reviewId);
         Logger.logSave(HttpMethod.DELETE, "/reviews/" + reviewId + "/dislike/" + userId,
                 ((Boolean) removal).toString());
     }
