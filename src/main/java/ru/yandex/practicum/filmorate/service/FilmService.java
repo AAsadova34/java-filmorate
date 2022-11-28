@@ -6,8 +6,11 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.log.Logger;
+import ru.yandex.practicum.filmorate.model.FeedOperationTypes;
+import ru.yandex.practicum.filmorate.model.FeedTypes;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.dal.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.dal.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.dal.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.dal.LikesStorage;
@@ -26,6 +29,7 @@ public class FilmService {
     private final UserService userService;
     private final LikesStorage likesStorage;
     private final GenreStorage genreStorage;
+    private final FeedStorage feedStorage;
 
     public Collection<Film> getFilms() {
         Collection<Film> filmsInStorage = filmStorage.getFilms();
@@ -64,6 +68,7 @@ public class FilmService {
         filmStorage.getFilmById(id);
         userService.getUserById(userId);
         addition = likesStorage.addLike(id, userId);
+        feedStorage.addFeed(userId, FeedTypes.LIKE.toString(), FeedOperationTypes.ADD.toString(), id);
         Logger.logSave(HttpMethod.PUT, "/films/" + id + "/like/" + userId, ((Boolean) addition).toString());
     }
 
@@ -76,6 +81,7 @@ public class FilmService {
             throw new ObjectNotFoundException(String.format("User with id %s did not like the movie with id %s",
                     userId, id));
         }
+        feedStorage.addFeed(userId, FeedTypes.LIKE.toString(), FeedOperationTypes.DELETE.toString(), id);
         Logger.logSave(HttpMethod.DELETE, "/films/" + id + "/like/" + userId, ((Boolean) removal).toString());
     }
 
