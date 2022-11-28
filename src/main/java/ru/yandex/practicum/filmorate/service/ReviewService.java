@@ -49,12 +49,14 @@ public class ReviewService {
     }
 
     public void removeReview(long id) {
+        long userId = getReviewById(id).getUserId();
+        long filmId = getReviewById(id).getFilmId();
         boolean removal = reviewStorage.removeReview(id);
         if (!removal) {
             throw new ObjectNotFoundException(String.format("Review with id %s not found", id));
         }
-        feedStorage.addFeed(getReviewById(id).getUserId(), FeedTypes.REVIEW.toString(),
-                FeedOperationTypes.DELETE.toString(), getReviewById(id).getFilmId());
+        feedStorage.addFeed(userId, FeedTypes.REVIEW.toString(),
+                FeedOperationTypes.DELETE.toString(), filmId);
         Logger.logSave(HttpMethod.DELETE, "/reviews/" + id, ((Boolean) removal).toString());
     }
 
