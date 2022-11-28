@@ -31,7 +31,7 @@ public class ReviewService {
         filmService.getFilmById(review.getFilmId());
         Review reviewInStorage = reviewStorage.addReview(review);
         feedStorage.addFeed(reviewInStorage.getUserId(), FeedTypes.REVIEW.toString(),
-                FeedOperationTypes.ADD.toString(), reviewInStorage.getFilmId());
+                FeedOperationTypes.ADD.toString(), reviewInStorage.getReviewId());
 
         Logger.logSave(HttpMethod.POST, "/reviews", reviewInStorage.toString());
         return reviewInStorage;
@@ -82,7 +82,6 @@ public class ReviewService {
         userService.getUserById(userId);
         reviewRatingStorage.removeLikeDislike(reviewId, userId, FALSE);
         addition = reviewRatingStorage.addLikeDislike(reviewId, userId, TRUE);
-        feedStorage.addFeed(userId, FeedTypes.LIKE.toString(), FeedOperationTypes.ADD.toString(), reviewId);
         Logger.logSave(HttpMethod.PUT, "/reviews/" + reviewId + "/like/" + userId, ((Boolean) addition).toString());
     }
 
@@ -92,7 +91,6 @@ public class ReviewService {
         userService.getUserById(userId);
         reviewRatingStorage.removeLikeDislike(reviewId, userId, TRUE);
         addition = reviewRatingStorage.addLikeDislike(reviewId, userId, FALSE);
-        //feedStorage.addFeed(userId, FeedTypes.DISLIKE.toString(), FeedOperationTypes.ADD.toString(), reviewId);
         Logger.logSave(HttpMethod.PUT, "/reviews/" + reviewId + "/dislike/" + userId,
                 ((Boolean) addition).toString());
     }
@@ -106,8 +104,6 @@ public class ReviewService {
             throw new ObjectNotFoundException(String.format("User with id %s did not like the review with id %s",
                     userId, reviewId));
         }
-        feedStorage.addFeed(userId, FeedTypes.LIKE.toString(),
-                FeedOperationTypes.REMOVE.toString(), reviewId);
         Logger.logSave(HttpMethod.DELETE, "/reviews/" + reviewId + "/like/" + userId,
                 ((Boolean) removal).toString());
     }
@@ -121,8 +117,6 @@ public class ReviewService {
             throw new ObjectNotFoundException(String.format("User with id %s did not dislike the review with id %s",
                     userId, reviewId));
         }
-        //feedStorage.addFeed(userId, FeedTypes.DISLIKE.toString(),
-        //        FeedOperationTypes.REMOVE.toString(), reviewId);
         Logger.logSave(HttpMethod.DELETE, "/reviews/" + reviewId + "/dislike/" + userId,
                 ((Boolean) removal).toString());
     }
