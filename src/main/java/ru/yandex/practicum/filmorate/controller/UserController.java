@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.log.Logger;
+import ru.yandex.practicum.filmorate.model.Feed;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -41,6 +43,12 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    @DeleteMapping("/{id}")
+    public void removeUserById(@PathVariable long id) {
+        Logger.logRequest(HttpMethod.DELETE, "/users/" + id, "no body");
+        userService.removeUserById(id);
+    }
+
     @PutMapping("/{id}/friends/{friendId}")//добавить в друзья
     public void addAsFriend(@PathVariable long id,
                                @PathVariable long friendId) {
@@ -66,5 +74,17 @@ public class UserController {
                                               @PathVariable long otherId) {
         Logger.logRequest(HttpMethod.GET, "/users/" + id + "/friends/common/" + otherId, "no body");
         return userService.getAListOfMutualFriends(id, otherId);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable long id) {
+        Logger.logRequest(HttpMethod.GET, "/users/" + id + "/recommendations", "no body");
+        return userService.getRecommendations(id);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Feed> getUsersFeed(@PathVariable long id) { //получить ленту событий
+        Logger.logRequest(HttpMethod.GET, "/users/" + id + "/feed", "no body");
+        return userService.getUsersFeed(id);
     }
 }

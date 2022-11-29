@@ -63,6 +63,12 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
+    @Override
+    public boolean removeUserById(long id) {
+        String sqlQuery = "delete from USERS where USER_ID = ?";
+        return jdbcTemplate.update(sqlQuery, id) > 0;
+    }
+
     private Map<String, Object> toMap(User user) {
         Map<String, Object> values = new HashMap<>();
         values.put("email", user.getEmail());
