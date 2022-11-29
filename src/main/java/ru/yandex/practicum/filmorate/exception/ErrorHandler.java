@@ -16,18 +16,18 @@ import java.util.Objects;
 public class ErrorHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({ValidationException.class, RedoCreationException.class, RuntimeException.class})
+    @ExceptionHandler({ValidationException.class, RedoCreationException.class,
+            RuntimeException.class, MethodArgumentNotValidException.class})
     public ErrorResponse handleValidationException(Exception e) {
         log.warn(e.getClass().getSimpleName(), e);
-        return new ErrorResponse(400, "Bad Request", e.getMessage());
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({MethodArgumentNotValidException.class})
-    public ErrorResponse handleNotValidArgumentException(MethodArgumentNotValidException e) {
-        log.warn(e.getClass().getSimpleName(), e);
-        return new ErrorResponse(400, "Bad Request",
-                Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage());
+        String message;
+        if (e instanceof MethodArgumentNotValidException) {
+            MethodArgumentNotValidException eValidation = (MethodArgumentNotValidException) e;
+            message = Objects.requireNonNull(eValidation.getBindingResult().getFieldError()).getDefaultMessage();
+        } else {
+            message = e.getMessage();
+        }
+        return new ErrorResponse(400, "Bad Request", message);
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
