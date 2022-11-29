@@ -36,6 +36,12 @@ public class LikesDbStorage implements LikesStorage {
     }
 
     @Override
+    public boolean checkLike(long filmId, long userId) {
+        String sqlQuery = "select COUNT(*) from LIKES where FILM_ID = ? and USER_ID = ?";
+        return jdbcTemplate.queryForObject(sqlQuery, Integer.class, filmId, userId) == 1;
+    }
+
+    @Override
     public List<Long> getListOfLikes(long filmId) {
         String sqlQuery = "select USER_ID from LIKES where FILM_ID = ?";
         return jdbcTemplate.queryForList(sqlQuery, Long.class, filmId);
