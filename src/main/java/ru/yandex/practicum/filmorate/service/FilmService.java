@@ -67,6 +67,10 @@ public class FilmService {
         boolean addition;
         filmStorage.getFilmById(id);
         userService.getUserById(userId);
+        if (likesStorage.checkLike(id, userId)) {
+            throw new RuntimeException(String.format("User with id %s has liked the movie with id %s",
+                    userId, id));
+        }
         addition = likesStorage.addLike(id, userId);
         feedStorage.addFeed(userId, FeedTypes.LIKE.toString(), FeedOperationTypes.ADD.toString(), id);
         Logger.logSave(HttpMethod.PUT, "/films/" + id + "/like/" + userId, ((Boolean) addition).toString());

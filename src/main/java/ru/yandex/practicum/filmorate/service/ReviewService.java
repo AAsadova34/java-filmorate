@@ -120,5 +120,4 @@ public class ReviewService {
         Logger.logSave(HttpMethod.DELETE, "/reviews/" + reviewId + "/dislike/" + userId,
                 ((Boolean) removal).toString());
     }
-
 }
